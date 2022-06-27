@@ -1,0 +1,11 @@
+.idea
+.vscode
+Application/*
+!Application/test
+Downloads/*
+!Downloads/config.json
+Logs/*
+!Logo/test
+config.ini
+Application.log
+output_sh_list.txt
