@@ -3,7 +3,7 @@
 # @Author       : gxusb admin@gxusb.com
 # @Date         : 2021-08-05 07:58:50
 # @LastEditors  : gxusb admin@gxusb.com
-# @LastEditTime : 2022-06-27 10:44:03
+# @LastEditTime : 2022-06-27 18:32:11
 # @FilePath     : /Bililive-Recorder/install.sh
 # @FileEncoding : -*- UTF-8 -*-
 # @Description  : install bililiverecorder
@@ -57,13 +57,13 @@ function check_sys() {
     else
       SYSTEM_OS_VERSION="linux-arm"
     fi
-    release="Debian"
+    release="debian"
   else
-    echo "$release"
+    echo "uname -a :$release"
   fi
   info_log "您当前的操作系统是: ${release} ${SYSTEM_OS_VERSION}"
   if [ -z "${SYSTEM_OS_VERSION}" ]; then
-    info_log "没有获取到操作系统版本"
+    info_log "没有获取到操作系统版本信息"
     exit 1
   fi
 }

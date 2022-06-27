@@ -3,7 +3,7 @@
 # @Author       : gxusb admin@gxusb.com
 # @Date         : 2022-04-08 10:21:33
 # @LastEditors  : gxusb admin@gxusb.com
-# @LastEditTime : 2022-06-27 09:50:56
+# @LastEditTime : 2022-06-27 18:30:44
 # @FilePath     : /Bililive-Recorder/tool.sh
 # @FileEncoding : -*- UTF-8 -*-
 # @Description  : 工具脚本
@@ -50,8 +50,8 @@ if [ -f "${ENV_PATH}" ]; then
     info_log "BR_USE_PROXY 变量 不存在"
   fi
   info_log "配置环境变量 export BR_USE_PROXY=${BR_USE_PROXY}"
-  info_log "配置环境变量 export BR_INSTALL_PATH=${BR_INSTALL_PATH}"
   info_log "配置环境变量 export BR_GITHUB_PROXY=${BR_GITHUB_PROXY}"
+  info_log "配置环境变量 export BR_INSTALL_PATH=${BR_INSTALL_PATH}"
 else
   info_log "没有配置文件，采用脚本自带配置"
   if [ "$BR_USE_PROXY" -eq 1 ]; then
@@ -100,13 +100,13 @@ function check_sys() {
     else
       SYSTEM_OS_VERSION="linux-arm"
     fi
-    release="Debian"
+    release="debian"
   else
-    echo "$release"
+    echo "uname -a :$release"
   fi
   info_log "您当前的操作系统是: ${release} ${SYSTEM_OS_VERSION}"
   if [ -z "${SYSTEM_OS_VERSION}" ]; then
-    info_log "没有获取到操作系统版本"
+    info_log "没有获取到操作系统版本信息"
     exit 1
   fi
 }
