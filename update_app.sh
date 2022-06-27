@@ -3,7 +3,7 @@
 # @Author       : gxusb admin@gxusb.com
 # @Date         : 2021-08-06 14:58:19
 # @LastEditors  : gxusb admin@gxusb.com
-# @LastEditTime : 2022-06-27 18:20:22
+# @LastEditTime : 2022-06-27 18:38:08
 # @FilePath     : /Bililive-Recorder/update_app.sh
 # @FileEncoding : -*- UTF-8 -*-
 # @Description  : update application
@@ -65,8 +65,7 @@ function upzip_file() {
     unzip -o "${APP_FILE_FATH}" -d "${BR_INSTALL_PATH}"
     # 判断压缩包是否可解压
     if [ $? -eq 0 ]; then
-      info_log "解压完成"
-      info_log "删除安装包"
+      info_log "解压完成，删除安装包"
       info_log "$(rm -fv "${APP_FILE_FATH}")"
       cd "$BR_INSTALL_PATH" || exit
       info_log "删除 Application 目录"
