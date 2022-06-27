@@ -3,7 +3,7 @@
 # @Author       : gxusb admin@gxusb.com
 # @Date         : 2021-08-05 07:58:50
 # @LastEditors  : gxusb admin@gxusb.com
-# @LastEditTime : 2022-06-27 18:32:11
+# @LastEditTime : 2022-06-27 18:35:33
 # @FilePath     : /Bililive-Recorder/install.sh
 # @FileEncoding : -*- UTF-8 -*-
 # @Description  : install bililiverecorder
@@ -192,10 +192,10 @@ function upzip_file() {
 }
 
 function set_local_version_info() {
-  info_log "📝记录当前版本信信息"
+  info_log "记录当前版本信信息"
   info_log "当前版本号 $APP_VERSION"
   info_log "当前安装目录 $BR_INSTALL_PATH"
-  info_log "当前系统信息 $SYSTEM_OS_VERSION"
+  info_log "当前系统信息 $release $SYSTEM_OS_VERSION"
   info_log "把版本信息（${APP_VERSION}）写入 $APP_LOCAL_VERSION"
   echo "${APP_VERSION}" >"$APP_LOCAL_VERSION"
   # 判断文件是否存在
