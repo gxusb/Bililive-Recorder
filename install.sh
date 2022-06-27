@@ -3,7 +3,7 @@
 # @Author       : gxusb admin@gxusb.com
 # @Date         : 2021-08-05 07:58:50
 # @LastEditors  : gxusb admin@gxusb.com
-# @LastEditTime : 2022-06-27 09:53:04
+# @LastEditTime : 2022-06-27 10:44:03
 # @FilePath     : /Bililive-Recorder/install.sh
 # @FileEncoding : -*- UTF-8 -*-
 # @Description  : install bililiverecorder
@@ -204,13 +204,15 @@ function set_local_version_info() {
   else
     info_log "程序设置文件不存在, 开始创建"
     : >"$ENV_PATH"
+    info_log "是否使用代理  0: 不使用  1: 使用"
+    read -rep "请输入对应的数字：" USE_PROXY
     cat <<-EFO >"$ENV_PATH"
 # 手动移动目录，要修改安装目录
 BR_INSTALL_PATH="$(printf '%s' "$BR_INSTALL_PATH")"
 # CDN Proxy address 
 BR_GITHUB_PROXY="https://ghproxy.com/"
 # 是否使用代理  0: 不使用  1: 使用
-BR_USE_PROXY="0"
+BR_USE_PROXY="$USE_PROXY"
 EFO
   fi
 }
