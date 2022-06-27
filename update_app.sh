@@ -3,7 +3,7 @@
 # @Author       : gxusb admin@gxusb.com
 # @Date         : 2021-08-06 14:58:19
 # @LastEditors  : gxusb admin@gxusb.com
-# @LastEditTime : 2022-06-26 08:36:52
+# @LastEditTime : 2022-06-27 18:20:22
 # @FilePath     : /Bililive-Recorder/update_app.sh
 # @FileEncoding : -*- UTF-8 -*-
 # @Description  : update application
@@ -50,14 +50,12 @@ function download_app() {
     info_log "下载失败"
     for i in {1..5}; do
       info_log "第${i}次重试"
-
       if curl -#Lo "${APP_FILE_FATH}" "$APP_URL"; then
         info_log "下载完成"
         break
       fi
     done
   fi
-  info_log "理论下载完成，请自行检查！"
 }
 # 解压安装包  并删除安装包
 function upzip_file() {
@@ -98,14 +96,14 @@ function upzip_file() {
 }
 
 function set_local_version_info() {
-  info_log "📝记录当前版本信信息"
+  info_log "记录当前版本信信息"
   info_log "把版本信息（""${APP_VERSION}""）写入 ${BR_INSTALL_PATH}/config/app_version.txt"
   echo "${APP_VERSION}" >"${BR_INSTALL_PATH}/config/app_version.txt"
 }
 
 function check_app_version() {
   if version_lt "$APP_LOCAL_VERSION" "$APP_REMOTELY_VERSION"; then
-    info_log "本地版本 $APP_LOCAL_VERSION is less than ( 小于 ) 远程版本 $APP_REMOTELY_VERSION ，可以更新。"
+    info_log "本地版本 $APP_LOCAL_VERSION 小于 远程版本 $APP_REMOTELY_VERSION ，可以更新。"
     download_app
     upzip_file
     set_local_version_info
