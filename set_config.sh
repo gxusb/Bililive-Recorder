@@ -3,7 +3,7 @@
 # @Author       : gxusb admin@gxusb.com
 # @Date         : 2021-08-07 14:25:21
 # @LastEditors  : gxusb admin@gxusb.com
-# @LastEditTime : 2022-06-26 08:35:16
+# @LastEditTime : 2022-06-28 22:16:57
 # @FilePath     : /Bililive-Recorder/set_config.sh
 # @FileEncoding : -*- UTF-8 -*-
 # @Description  : set config
@@ -35,9 +35,8 @@ EOF
   if ((OptionText == 1)); then
     info_log "输入无效"
   fi
-  read -rep "请输入对应选项的数字：" numa
-
-  case $numa in
+  read -rep "请输入对应选项的数字：" Option_number
+  case $Option_number in
   1)
     info_log "Show help and usage information"
     "${BR_INSTALL_PATH}"/Application/BililiveRecorder.Cli configure --help
