@@ -3,7 +3,7 @@
 # @Author       : gxusb admin@gxusb.com
 # @Date         : 2021-08-05 07:58:50
 # @LastEditors  : gxusb admin@gxusb.com
-# @LastEditTime : 2022-07-03 22:02:44
+# @LastEditTime : 2022-07-03 22:06:39
 # @FilePath     : /Bililive-Recorder/install.sh
 # @FileEncoding : -*- UTF-8 -*-
 # @Description  : install bililiverecorder
@@ -136,7 +136,6 @@ function download_app() {
     info_log "下载完成"
   else
     info_log "下载失败"
-    # 重试5次
     for i in {1..5}; do
       info_log "第${i}次重试"
       sleep 1
@@ -159,8 +158,7 @@ function upzip_file() {
     info_log "开始解压到Application目录"
     # 判断压缩包是否解压完成
     if unzip -q -o "${APP_FILE_FATH}" -d "${BR_INSTALL_PATH}"; then
-      info_log "解压完成"
-      info_log "删除安装包"
+      info_log "解压完成 删除安装包"
       info_log "$(rm -fv "${APP_FILE_FATH}")"
       cd "$BR_INSTALL_PATH" || exit
       info_log "删除 Application 目录"
