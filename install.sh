@@ -3,7 +3,7 @@
 # @Author       : gxusb admin@gxusb.com
 # @Date         : 2021-08-05 07:58:50
 # @LastEditors  : gxusb admin@gxusb.com
-# @LastEditTime : 2022-06-27 18:35:33
+# @LastEditTime : 2022-07-03 22:02:44
 # @FilePath     : /Bililive-Recorder/install.sh
 # @FileEncoding : -*- UTF-8 -*-
 # @Description  : install bililiverecorder
@@ -131,9 +131,8 @@ function download_app() {
   info_log "开始下载文件"
   info_log "下载地址 $APP_URL"
   # curl -Lo# "${APP_FILE_FATH}" "$APP_URL"
-  wget --no-check-certificate -L -O "${APP_FILE_FATH}" "$APP_URL"
-  # 判断是否success
-  if [ $? -eq 0 ]; then
+  # 判断是否下载success
+  if wget --no-check-certificate -L -O "${APP_FILE_FATH}" "$APP_URL"; then
     info_log "下载完成"
   else
     info_log "下载失败"
@@ -158,9 +157,8 @@ function upzip_file() {
     #   info_log "压缩包不完整"
     # fi
     info_log "开始解压到Application目录"
-    unzip -q -o "${APP_FILE_FATH}" -d "${BR_INSTALL_PATH}"
-    # 判断压缩包是否可解压
-    if [ $? -eq 0 ]; then
+    # 判断压缩包是否解压完成
+    if unzip -q -o "${APP_FILE_FATH}" -d "${BR_INSTALL_PATH}"; then
       info_log "解压完成"
       info_log "删除安装包"
       info_log "$(rm -fv "${APP_FILE_FATH}")"
@@ -210,7 +208,7 @@ function set_local_version_info() {
 # 手动移动目录，要修改安装目录
 BR_INSTALL_PATH="$(printf '%s' "$BR_INSTALL_PATH")"
 # CDN Proxy address 
-BR_GITHUB_PROXY="https://ghproxy.com/"
+BR_GITHUB_PROXY="$BR_GITHUB_PROXY"
 # 是否使用代理  0: 不使用  1: 使用
 BR_USE_PROXY="$USE_PROXY"
 EFO
