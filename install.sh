@@ -3,7 +3,7 @@
 # @Author       : gxusb admin@gxusb.com
 # @Date         : 2021-08-05 07:58:50
 # @LastEditors  : gxusb admin@gxusb.com
-# @LastEditTime : 2022-07-03 22:06:39
+# @LastEditTime : 2022-07-08 20:10:34
 # @FilePath     : /Bililive-Recorder/install.sh
 # @FileEncoding : -*- UTF-8 -*-
 # @Description  : install bililiverecorder
@@ -157,21 +157,21 @@ function upzip_file() {
     # fi
     info_log "开始解压到Application目录"
     # 判断压缩包是否解压完成
-    if unzip -q -o "${APP_FILE_FATH}" -d "${BR_INSTALL_PATH}"; then
+    if unzip -q -o "${APP_FILE_FATH}" -d "${BR_INSTALL_PATH}/unzip"; then
       info_log "解压完成 删除安装包"
       info_log "$(rm -fv "${APP_FILE_FATH}")"
       cd "$BR_INSTALL_PATH" || exit
       info_log "删除 Application 目录"
       rm -rf Application/
       info_log "把解压文件移动到 Application 目录"
-      if [ -d "$SYSTEM_OS_VERSION/Release" ]; then
+      if [ -d "${BR_INSTALL_PATH}/unzip/Release" ]; then
         info_log "Release文件夹已存在，开始移动"
-        mv "$SYSTEM_OS_VERSION/Release" "${BR_INSTALL_PATH}/Application"
-        rm -rf "$SYSTEM_OS_VERSION" # 删除文件夹
+        mv "${BR_INSTALL_PATH}/unzip/Release" "${BR_INSTALL_PATH}/Application"
+        rm -rf "${BR_INSTALL_PATH}/unzip" # 删除文件夹
         info_log "移动完成"
       else
         info_log "Release文件夹不存在，开始移动"
-        mv -v "${SYSTEM_OS_VERSION}" "${BR_INSTALL_PATH}/Application"
+        mv -v "${BR_INSTALL_PATH}/unzip" "${BR_INSTALL_PATH}/Application"
         info_log "移动完成"
       fi
       info_log "设置文件可执行权限 Application/BililiveRecorder.Cli"
