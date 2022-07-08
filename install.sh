@@ -3,7 +3,7 @@
 # @Author       : gxusb admin@gxusb.com
 # @Date         : 2021-08-05 07:58:50
 # @LastEditors  : gxusb admin@gxusb.com
-# @LastEditTime : 2022-07-08 20:10:34
+# @LastEditTime : 2022-07-08 20:15:59
 # @FilePath     : /Bililive-Recorder/install.sh
 # @FileEncoding : -*- UTF-8 -*-
 # @Description  : install bililiverecorder
@@ -167,13 +167,13 @@ function upzip_file() {
       if [ -d "${BR_INSTALL_PATH}/unzip/Release" ]; then
         info_log "Release文件夹已存在，开始移动"
         mv "${BR_INSTALL_PATH}/unzip/Release" "${BR_INSTALL_PATH}/Application"
-        rm -rf "${BR_INSTALL_PATH}/unzip" # 删除文件夹
         info_log "移动完成"
       else
         info_log "Release文件夹不存在，开始移动"
         mv -v "${BR_INSTALL_PATH}/unzip" "${BR_INSTALL_PATH}/Application"
         info_log "移动完成"
       fi
+      rm -rf "${BR_INSTALL_PATH}/unzip" # 删除文件夹
       info_log "设置文件可执行权限 Application/BililiveRecorder.Cli"
       chmod +x Application/BililiveRecorder.Cli
     else
