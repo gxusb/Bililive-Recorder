@@ -3,7 +3,7 @@
 # @Author       : gxusb admin@gxusb.com
 # @Date         : 2021-08-05 07:58:50
 # @LastEditors  : gxusb admin@gxusb.com
-# @LastEditTime : 2022-07-11 22:13:33
+# @LastEditTime : 2022-07-11 23:26:15
 # @FilePath     : /Bililive-Recorder/install.sh
 # @FileEncoding : -*- UTF-8 -*-
 # @Description  : install bililiverecorder
@@ -195,22 +195,29 @@ function set_local_version_info() {
   info_log "把版本信息（${APP_VERSION}）写入 $APP_LOCAL_VERSION"
   echo "${APP_VERSION}" >"$APP_LOCAL_VERSION"
 
-  info_log "是否使用代理  0: 不使用  1: 使用"
-  read -rep "请输入对应的数字：" USE_PROXY
-  read -rep "请输入 HTTP Basic 登录用户名(默认 admin) : " USERNAME
+  info_log "是否使用代理  0: 不使用 1: 使用"
+  read -rep "请输入对应的数字 (默认不使用) ：" USE_PROXY
+  [[ -z "$USE_PROXY" ]] && USE_PROXY="0"
+  read -rep "请输入 HTTP Basic 登录用户名 (默认 admin) : " USERNAME
   [[ -z "$USERNAME" ]] && USERNAME="admin"
-  read -rep "请输入 HTTP Basic 登录密码(默认 8位随机密码) : " PASSWORD
-  [[ -z "$PASSWORD" ]] && PASSWORD="$(head -c 8 /dev/urandom | xxd -ps | cut -c 1-8)"
+  read -rep "请输入 HTTP Basic 登录密码 (默认 8位随机密码) : " PASSWORD
+  [[ -z "$PASSWORD" ]] && PASSWORD="$(head -c 16 /dev/urandom | xxd -ps | cut -c 1-8)"
   info_log "HTTP Basic 登录用户名：$USERNAME 密码：$PASSWORD"
 
   # 判断文件是否存在
   if [ -f "$ENV_PATH" ]; then
     info_log "程序设置文件已存在"
-    read -rep "是否覆盖程序设置文件 (y/n) : " config_file_option
-    if [[ "${config_file_option}" == "y" || "${config_file_option}" == "Y" ]]; then
+    read -rep "是否覆盖程序设置文件 (y/n 默认y) : " config_file_option
+    if [[ -z "$config_file_option" ]]; then
+      info_log "本次写入程序设置"
       write_configuration
     else
-      info_log "本次不写入程序设置"
+      if [[ "$config_file_option" == "n" || "$config_file_option" == "N" ]]; then
+        info_log "本次不写入程序设置"
+      else
+        info_log "写入程序设置"
+        write_configuration
+      fi
     fi
   else
     info_log "程序设置文件不存在, 开始创建"
