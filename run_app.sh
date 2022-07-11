@@ -3,7 +3,7 @@
 # @Author       : gxusb admin@gxusb.com
 # @Date         : 2021-08-06 10:13:36
 # @LastEditors  : gxusb admin@gxusb.com
-# @LastEditTime : 2022-06-27 09:56:07
+# @LastEditTime : 2022-07-11 20:59:51
 # @FilePath     : /Bililive-Recorder/run_app.sh
 # @FileEncoding : -*- UTF-8 -*-
 # @Description  : run app
@@ -48,7 +48,7 @@ function stop_BililiveRecorder() {
 function run_app() {
   stop_BililiveRecorder
   Log_archive # 日志归档
-  nohup "${BR_INSTALL_PATH}"/Application/BililiveRecorder.Cli run --bind "http://*:2233" "$BR_INSTALL_PATH/Downloads" >>"${BR_INSTALL_PATH}"/Application.log 2>&1 &
+  nohup "${BR_INSTALL_PATH}"/Application/BililiveRecorder.Cli run --bind "http://*:2233" --http-basic-user "$BR_USERNAME" --http-basic-pass "$BR_PASSWORD" "$BR_INSTALL_PATH/Downloads" >>"${BR_INSTALL_PATH}"/Application.log 2>&1 &
   sleep 2
   if [[ -n $(pgrep -f BililiveRecorder) ]]; then
     info_log "提示: 应用程序启动成功！"
