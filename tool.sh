@@ -3,7 +3,7 @@
 # @Author       : gxusb admin@gxusb.com
 # @Date         : 2022-04-08 10:21:33
 # @LastEditors  : gxusb admin@gxusb.com
-# @LastEditTime : 2022-07-11 21:24:37
+# @LastEditTime : 2022-07-15 16:11:41
 # @FilePath     : /Bililive-Recorder/tool.sh
 # @FileEncoding : -*- UTF-8 -*-
 # @Description  : 工具脚本
@@ -21,7 +21,7 @@ function info_log() {
   if [ -n "$2" ]; then
     local interval=$2
   else
-    local interval=0.5 # 日志打印间隔时间 单位：秒
+    local interval=0.3 # 日志打印间隔时间 单位：秒
   fi
   local interval
   time_interval=$(date '+%Y-%m-%d %T INFO')
@@ -31,10 +31,10 @@ function info_log() {
 
 # 获取脚本所在的目录
 ENV_PATH="$(dirname "$0")/config/config.ini"
-info_log "配置文件路径${ENV_PATH}"
+info_log "配置文件路径${ENV_PATH}" 0
 # 获取配置文件
 if [ -f "${ENV_PATH}" ]; then
-  info_log "从${ENV_PATH}文件获取配置信息" 1
+  info_log "从${ENV_PATH}文件获取配置信息" 0.1
   # shellcheck disable=SC1090
   source "$ENV_PATH"
   #判断$BR_USE_PROXY是否存在
@@ -49,11 +49,10 @@ if [ -f "${ENV_PATH}" ]; then
   else
     info_log "BR_USE_PROXY 变量 不存在"
   fi
-  info_log "配置环境变量 export BR_USE_PROXY=${BR_USE_PROXY}"
-  info_log "配置环境变量 export BR_GITHUB_PROXY=${BR_GITHUB_PROXY}"
-  info_log "配置环境变量 export BR_INSTALL_PATH=${BR_INSTALL_PATH}"
-  info_log "配置环境变量 export BR_USERNAME=${BR_USERNAME}"
-  info_log "配置环境变量 export BR_PASSWORD=${BR_PASSWORD}" 
+  env_list=$(cat <"$ENV_PATH" | grep -Ev "^#" | awk '{print $1}')
+  for i in $env_list; do
+    info_log "配置环境变量 export $i" 0
+  done
 else
   info_log "没有配置文件，采用脚本自带配置"
   if [ "$BR_USE_PROXY" -eq 1 ]; then
