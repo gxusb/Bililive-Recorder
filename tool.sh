@@ -3,7 +3,7 @@
 # @Author       : gxusb admin@gxusb.com
 # @Date         : 2022-04-08 10:21:33
 # @LastEditors  : gxusb admin@gxusb.com
-# @LastEditTime : 2022-07-15 16:11:41
+# @LastEditTime : 2022-07-20 18:04:16
 # @FilePath     : /Bililive-Recorder/tool.sh
 # @FileEncoding : -*- UTF-8 -*-
 # @Description  : 工具脚本
@@ -49,7 +49,7 @@ if [ -f "${ENV_PATH}" ]; then
   else
     info_log "BR_USE_PROXY 变量 不存在"
   fi
-  env_list=$(cat <"$ENV_PATH" | grep -Ev "^#" | awk '{print $1}')
+  env_list=$(grep -Ev "^#" "$ENV_PATH" | awk '{print $1}')
   for i in $env_list; do
     info_log "配置环境变量 export $i" 0
   done

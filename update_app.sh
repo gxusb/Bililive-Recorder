@@ -3,7 +3,7 @@
 # @Author       : gxusb admin@gxusb.com
 # @Date         : 2021-08-06 14:58:19
 # @LastEditors  : gxusb admin@gxusb.com
-# @LastEditTime : 2022-07-08 20:14:26
+# @LastEditTime : 2022-07-20 18:09:33
 # @FilePath     : /Bililive-Recorder/update_app.sh
 # @FileEncoding : -*- UTF-8 -*-
 # @Description  : update application
@@ -31,7 +31,7 @@ if [ -z "$APP_VERSION" ]; then
   info_log "获取版本信息失败，请检查网络"
   exit 1
 fi
-APP_LOCAL_VERSION=$(cat <"${BR_INSTALL_PATH}/config/app_version.txt" | grep "v")
+APP_LOCAL_VERSION=$(grep "v" "${BR_INSTALL_PATH}/config/app_version.txt")
 APP_REMOTELY_VERSION=${APP_VERSION}
 # https://sobaigu.com/shell-get-lastest-version-from-github.html
 APP_URL="${BR_GITHUB_PROXY}https://github.com/Bililive/BililiveRecorder/releases/download/${APP_VERSION}/BililiveRecorder-CLI-${SYSTEM_OS_VERSION}.zip"
