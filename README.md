@@ -96,25 +96,40 @@ nohup ./BililiveRecorder.Cli run "/root/BilibiliLive" >>/root/BilibiliLive/Appli
 
 ## 创建系统服务
 
-创建系统服务：vim /etc/systemd/system/brh.service
+创建系统服务：vim /etc/systemd/system/brec.service
 
 ```service
 [Unit]
-Description=BililiveRecorder System Services
+Description=BililiveRecorder
 After=network.target
 [Service]
-ExecStart=/root/Bililive-Recorder/Application/BililiveRecorder.Cli run --bind "http://*:2233" /root/Bililive-Recorder/Downloads
+ExecStart=/opt/Bililive-Recorder/Application/Application/BililiveRecorder.Cli run --bind "http://*:2233" --http-basic-user "用户名" --http-basic-pass "密码" "/opt/Bililive-Recorder/Downloads"
+ExecReload=/bin/kill -HUP $MAINPID
+Restart=on-failure
 [Install]
 WantedBy=multi-user.target
 ```
 然后可以用 systemctl 控制该服务。
 
+然后重载服务：
+```bash
+systemctl daemon-reload
+```
+每次修改了 brec.service 文件后都需要运行这个命令重载一次。
+
+设置开机启动
+`systemctl enable brec`
+可以用以下命令禁用开机启动
+`systemctl disable brec`
+
+查看运行状态：
+`systemctl status brec`
 
 ```shell
 # 开启服务
-systemctl start brh.service
+systemctl start brec.service
 # 停止服务
-systemctl stop brh.service
+systemctl stopbrec.service
 # 查看状态和部分日志
-systemctl status brh.service
+systemctl status brec.service
 ```
