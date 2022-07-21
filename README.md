@@ -119,7 +119,8 @@ systemctl daemon-reload
 
 设置开机启动
 `systemctl enable brec`
-可以用以下命令禁用开机启动
+
+禁用开机启动
 `systemctl disable brec`
 
 查看运行状态：
