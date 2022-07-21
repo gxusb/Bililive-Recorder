@@ -3,7 +3,7 @@
 # @Author       : gxusb admin@gxusb.com
 # @Date         : 2022-07-15 15:04:45
 # @LastEditors  : gxusb admin@gxusb.com
-# @LastEditTime : 2022-07-21 21:32:09
+# @LastEditTime : 2022-07-21 21:38:35
 # @FilePath     : /Bililive-Recorder/servce.sh
 # @FileEncoding : -*- UTF-8 -*-
 # @Description  : 创建系统服务
@@ -35,7 +35,7 @@ function Create_service() {
 Description=BililiveRecorder
 After=network.target
 [Service]
-ExecStart=/opt/Bililive-Recorder/Application/Application/BililiveRecorder.Cli run --bind "http://*:2233" --http-basic-user "$BR_USERNAME" --http-basic-pass "$BR_PASSWORD" "$BR_INSTALL_PATH/Downloads"
+ExecStart="$BRBR_INSTALL_PATH"/Application/Application/BililiveRecorder.Cli run --bind "http://*:2233" --http-basic-user "$BR_USERNAME" --http-basic-pass "$BR_PASSWORD" "$BR_INSTALL_PATH/Downloads"
 ExecReload=/bin/kill -HUP \$MAINPID
 Restart=on-failure
 [Install]
