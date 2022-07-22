@@ -103,7 +103,7 @@ nohup ./BililiveRecorder.Cli run "/root/BilibiliLive" >>/root/BilibiliLive/Appli
 Description=BililiveRecorder
 After=network.target
 [Service]
-ExecStart=/opt/Bililive-Recorder/Application/Application/BililiveRecorder.Cli run --bind "http://*:2233" --http-basic-user "用户名" --http-basic-pass "密码" "/opt/Bililive-Recorder/Downloads"
+ExecStart=/opt/Bililive-Recorder/Application/BililiveRecorder.Cli run --bind "http://*:2233" --http-basic-user "用户名" --http-basic-pass "密码" "/opt/Bililive-Recorder/Downloads"
 ExecReload=/bin/kill -HUP $MAINPID
 Restart=on-failure
 [Install]
