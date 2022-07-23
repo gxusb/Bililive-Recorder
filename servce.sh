@@ -3,7 +3,7 @@
 # @Author       : gxusb admin@gxusb.com
 # @Date         : 2022-07-15 15:04:45
 # @LastEditors  : gxusb admin@gxusb.com
-# @LastEditTime : 2022-07-22 09:57:03
+# @LastEditTime : 2022-07-23 23:11:09
 # @FilePath     : /Bililive-Recorder/servce.sh
 # @FileEncoding : -*- UTF-8 -*-
 # @Description  : 创建系统服务
@@ -23,11 +23,6 @@ else
     info_log "tool.sh not found"
 fi
 info_log "当前脚本所在目录 $cur_dir" && sleep 1
-
-if [[ $release == "macos" ]]; then
-    echo "系统不支持"
-    exit 1
-fi
 
 function Create_service() {
     cat <<EOF >/etc/systemd/system/brec.service
@@ -68,6 +63,10 @@ function menu() {
     (2) 删除系统服务
     (3) 退出脚本
 EOF
+    if [[ $release == "macos" ]]; then
+        echo "操作系统不支持"
+        exit 1
+    fi
     if ((OptionText == 1)); then
         info_log "输入无效"
     fi
