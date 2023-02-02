@@ -123,7 +123,7 @@ systemctl daemon-reload
 禁用开机启动
 `systemctl disable brec`
 
-查看运行状态：
+查看运行状态
 `systemctl status brec`
 
 ```shell
