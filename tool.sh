@@ -3,7 +3,7 @@
 # @Author       : gxusb admin@gxusb.com
 # @Date         : 2022-04-08 10:21:33
 # @LastEditors  : gxusb admin@gxusb.com
-# @LastEditTime : 2022-07-20 18:04:16
+# @LastEditTime : 2023-03-16 21:02:28
 # @FilePath     : /Bililive-Recorder/tool.sh
 # @FileEncoding : -*- UTF-8 -*-
 # @Description  : 工具脚本
@@ -17,16 +17,11 @@
 # @return {*}
 ##
 function info_log() {
-  local content=$1 # 日志内容
-  if [ -n "$2" ]; then
-    local interval=$2
-  else
-    local interval=0.3 # 日志打印间隔时间 单位：秒
-  fi
-  local interval
+  local content=${1:-'test log'} # 日志内容
+  local interval=${2:-0.3}       # 打印间隔时间 单位：秒
   time_interval=$(date '+%Y-%m-%d %T INFO')
   echo -e "\033[32;1m[${time_interval}]\033[0m ${content}"
-  sleep $interval
+  sleep "$interval"
 }
 
 # 获取脚本所在的目录
