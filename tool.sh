@@ -3,7 +3,7 @@
 # @Author       : gxusb admin@gxusb.com
 # @Date         : 2022-04-08 10:21:33
 # @LastEditors  : gxusb admin@gxusb.com
-# @LastEditTime : 2023-03-16 21:02:28
+# @LastEditTime : 2023-03-16 21:23:33
 # @FilePath     : /Bililive-Recorder/tool.sh
 # @FileEncoding : -*- UTF-8 -*-
 # @Description  : 工具脚本
@@ -32,22 +32,22 @@ if [ -f "${ENV_PATH}" ]; then
   info_log "从${ENV_PATH}文件获取配置信息" 0.1
   # shellcheck disable=SC1090
   source "$ENV_PATH"
+  # 排除以#开头的行，打印配置变量
+  env_list=$(grep -Ev "^#" "$ENV_PATH" | awk '{print $1}')
+  for i in $env_list; do
+    info_log "配置环境变量 export $i" 0
+  done
   #判断$BR_USE_PROXY是否存在
   if [ -n "$BR_USE_PROXY" ]; then
-    info_log "BR_USE_PROXY 变量 存在"
     if [ "$BR_USE_PROXY" -eq 1 ]; then
-      info_log "使用代理"
+      info_log "使用代理，BR_USE_PROXY 变量存在"
     else
       info_log "不使用代理"
       BR_GITHUB_PROXY=""
     fi
   else
-    info_log "BR_USE_PROXY 变量 不存在"
+    info_log "BR_USE_PROXY 变量不存在"
   fi
-  env_list=$(grep -Ev "^#" "$ENV_PATH" | awk '{print $1}')
-  for i in $env_list; do
-    info_log "配置环境变量 export $i" 0
-  done
 else
   info_log "没有配置文件，采用脚本自带配置"
   if [ "$BR_USE_PROXY" -eq 1 ]; then
