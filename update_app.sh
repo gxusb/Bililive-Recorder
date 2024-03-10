@@ -88,6 +88,8 @@ function upzip_file() {
       rm -rfv "${BR_INSTALL_PATH}"/unzip # 删除文件夹
       info_log "设置文件可执行权限 Application/BililiveRecorder.Cli"
       chmod +x Application/BililiveRecorder.Cli
+      # 记录当前版本信信息
+      set_local_version_info
     else
       info_log "解压失败"
       rm "${APP_FILE_FATH}"
@@ -110,7 +112,6 @@ function check_app_version() {
     info_log "本地版本 $APP_LOCAL_VERSION 小于 远程版本 $APP_REMOTELY_VERSION ，可以更新。"
     download_app
     upzip_file
-    set_local_version_info
   else
     info_log "本地版本 $APP_LOCAL_VERSION 与 远程版本 $APP_REMOTELY_VERSION 相同，已是最新版本，无需更新！"
   fi
