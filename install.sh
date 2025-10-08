@@ -155,6 +155,7 @@ main() {
   detect_os
 
   # === 3. 获取远程版本 ===
+  info_log "获取最新版本信息..." 0.1
   APP_VERSION=$(curl -sL "https://api.github.com/repos/Bililive/BililiveRecorder/releases/latest" | grep '"tag_name"' | head -n1 | cut -d'"' -f4)
   if [[ -z "$APP_VERSION" ]]; then
     info_log "获取远程版本失败" 0
@@ -188,7 +189,7 @@ main() {
     echo "$APP_VERSION" > "$LOCAL_VERSION_FILE"
     info_log "✅ 更新完成！" 0
   else
-    info_log "已是最新版本：$APP_VERSION，无需更新。" 0
+    info_log "已是最新版本：$APP_VERSION ，无需更新。" 0
   fi
 }
 
