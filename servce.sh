@@ -1,20 +1,15 @@
 #!/bin/bash
 ###
-# @Author       : gxusb admin@gxusb.com
+# @Author       : Gxusb
 # @Date         : 2022-07-15 15:04:45
-# @LastEditors  : gxusb admin@gxusb.com
-# @LastEditTime : 2022-07-23 23:11:09
-# @FilePath     : /Bililive-Recorder/servce.sh
+# @LastEditTime : 2025-10-08 20:48:59
 # @FileEncoding : -*- UTF-8 -*-
 # @Description  : 创建系统服务
-# @Copyright (c) 2022 by gxusb, All Rights Reserved.
+# @Copyright (c) 2025 by Gxusb, All Rights Reserved.
 ###
 
 # 获取当前脚本的绝对路径
-cur_dir=$(
-    cd "$(dirname "$0")" || exit
-    pwd
-)
+cur_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # 本地模式 加载变量
 if [ -f "$cur_dir/tool.sh" ]; then
     # shellcheck source=/dev/null

@@ -1,39 +1,60 @@
 #!/bin/bash
 ###
-# @Author       : gxusb admin@gxusb.com
+# @Author       : Gxusb
 # @Date         : 2021-08-06 10:28:46
-# @LastEditors  : gxusb admin@gxusb.com
-# @LastEditTime : 2022-06-27 09:57:56
-# @FilePath     : /Bililive-Recorder/stop_app.sh
+# @LastEditTime : 2025-10-08 20:56:57
 # @FileEncoding : -*- UTF-8 -*-
-# @Description  : stop app
-# @Copyright (c) 2022 by gxusb, All Rights Reserved. 
+# @Description  : 停止 BililiveRecorder 应用程序
+# @Copyright (c) 2025 by Gxusb, All Rights Reserved.
 ###
 
-#获取脚本所在的父目录
+# 获取配置文件路径
 ENV_PATH="$(dirname "$0")/config/config.ini"
-# 本地模式
-if [ -f "${ENV_PATH}" ]; then
-  # shellcheck disable=SC1090
+
+# 加载配置（若存在）
+if [[ -f "$ENV_PATH" ]]; then
+  # shellcheck source=/dev/null
   source "$ENV_PATH"
 fi
-echo "配置文件路径${ENV_PATH}"
 
 info_log() {
-  echo -e "\\033[32;1m[$(date '+%Y-%m-%d %T INFO')]\\033[0m ${*}"
-  sleep 0.3 # 可优化运行速度 延时X秒显示输出的日志
+  echo -e "\\033[32;1m[$(date '+%Y-%m-%d %T INFO')]\\033[0m $*"
 }
-# 停止APP
-function stop_BililiveRecorder() {
-  info_log "停止BililiveRecorder"
-  # ps -ef | grep BililiveRecorder | grep -v grep | awk '{print $2" "$3}' | xargs kill -9
-  # 查找进程 BililiveRecorder 根据进程名称  杀死进程
-  if [[ -n $(pgrep -f BililiveRecorder) ]]; then
-    info_log "提示: 程序正在运行，即将终止应用程序。"
-    pgrep -f "BililiveRecorder" | xargs kill -9
-    echo "[$(date '+%T IFN')] $(date '+%Y-%m-%d') 应用程序已停止。" >>"${BR_INSTALL_PATH}"/Application.log
+
+# 安全停止 BililiveRecorder
+stop_BililiveRecorder() {
+  local bin_name="BililiveRecorder.Cli"  # 更精确的二进制名（避免误杀）
+  local pids
+
+  # 获取精确匹配的进程 PID（避免脚本名、路径等干扰）
+  # 使用 pgrep -f 可能太宽泛，这里限定为包含完整路径或明确可执行文件名
+  pids=$(pgrep -f "$bin_name")
+
+  if [[ -n "$pids" ]]; then
+    info_log "检测到运行中的进程，PID: $pids"
+    info_log "发送 SIGTERM 信号，请求优雅退出..."
+
+    # 发送 SIGTERM（15）
+    kill "$pids" 2>/dev/null
+
+    # 等待最多 10 秒让进程退出
+    local count=0
+    while [[ -n "$(pgrep -f "$bin_name")" ]] && [[ $count -lt 10 ]]; do
+      sleep 1
+      ((count++))
+    done
+
+    # 若仍未退出，强制 kill
+    if [[ -n "$(pgrep -f "$bin_name")" ]]; then
+      info_log "进程未响应 SIGTERM，发送 SIGKILL 强制终止..."
+      kill -9 "$pids" 2>/dev/null
+    fi
+
+    # 记录日志
+    echo "[$(date '+%Y-%m-%d %T INFO')] 应用程序已停止。" >> "${BR_INSTALL_PATH}/Application.log"
+    info_log "BililiveRecorder 已停止。"
   else
-    info_log "提示: 程序不在运行。"
+    info_log "未检测到运行中的 BililiveRecorder 进程。"
   fi
 }
 

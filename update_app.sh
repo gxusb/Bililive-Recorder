@@ -1,27 +1,10 @@
 #!/bin/bash
-###
-# @Author       : gxusb admin@gxusb.com
-# @Date         : 2021-08-06 14:58:19
-# @LastEditors  : gxusb admin@gxusb.com
-# @LastEditTime : 2022-10-03 21:21:34
-# @FilePath     : /Bililive-Recorder/update_app.sh
-# @FileEncoding : -*- UTF-8 -*-
-# @Description  : update application
-# @Copyright (c) 2022 by gxusb, All Rights Reserved.
-###
 
 # 获取当前脚本的绝对路径
-cur_dir=$(
-  cd "$(dirname "$0")" || exit
-  pwd
-)
-# 本地模式 加载变量
-if [ -f "$cur_dir/tool.sh" ]; then
-  # shellcheck source=/dev/null
-  source "$cur_dir/tool.sh"
-else
-  info_log "tool.sh not found"
-fi
+cur_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=/dev/null
+source "$cur_dir/tool.sh"
+
 info_log "当前脚本所在目录 $cur_dir" && sleep 1
 
 # 版本信息
