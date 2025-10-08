@@ -1,6 +1,9 @@
 #!/bin/bash
 ###
 # @Author       : Gxusb
+# @Date         : 2021-08-07 14:25:21
+# @LastEditTime : 2025-10-09 03:07:53
+# @FileEncoding : -*- UTF-8 -*-
 # @Description  : 跨平台 BililiveRecorder 服务管理（Linux systemd + macOS launchd）
 # @Copyright (c) 2025 by Gxusb, All Rights Reserved.
 ###
@@ -156,50 +159,31 @@ fi
 
 # === 菜单 ===
 show_menu() {
+  if [[ -n "${IS_LINUX:-}" ]]; then
+    title="Linux systemd"
+    create_fn="create_linux_service"
+    delete_fn="delete_linux_service"
+  else
+    title="macOS launchd"
+    create_fn="create_macos_service"
+    delete_fn="delete_macos_service"
+  fi
+
   while true; do
-    if [[ -n "${IS_LINUX:-}" ]]; then
-      cat <<-EOF
+    cat <<-EOF
 
-######## Linux systemd 服务管理 ########
+######## ${title} 服务管理 ########
   1) 创建并启用服务
   2) 停止并删除服务
   3) 退出
 EOF
-    else
-      cat <<-EOF
-
-######## macOS launchd 服务管理 ########
-  1) 创建并启用服务
-  2) 停止并删除服务
-  3) 退出
-EOF
-    fi
 
     read -rp "请选择 [1-3]: " choice
-
     case "$choice" in
-      1)
-        if [[ -n "${IS_LINUX:-}" ]]; then
-          create_linux_service
-        else
-          create_macos_service
-        fi
-        ;;
-      2)
-        if [[ -n "${IS_LINUX:-}" ]]; then
-          delete_linux_service
-        else
-          delete_macos_service
-        fi
-        ;;
-      3)
-        info_log "退出"
-        exit 0
-        ;;
-      *)
-        echo "❌ 无效选项"
-        sleep 1
-        ;;
+      1) "$create_fn" ;;
+      2) "$delete_fn" ;;
+      3) info_log "退出"; exit 0 ;;
+      *) echo "❌ 无效选项"; sleep 1 ;;
     esac
   done
 }
