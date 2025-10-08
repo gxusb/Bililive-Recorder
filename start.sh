@@ -2,7 +2,7 @@
 ###
 # @Author       : Gxusb
 # @Date         : 2021-08-06 10:13:36
-# @LastEditTime : 2025-10-09 01:02:59
+# @LastEditTime : 2025-10-09 02:33:59
 # @FileEncoding : -*- UTF-8 -*-
 # @Description  : 启动 BililiveRecorder 应用程序
 # @Copyright (c) 2025 by Gxusb, All Rights Reserved.
@@ -108,6 +108,8 @@ run_app() {
     {
       echo "[$(date '+%Y-%m-%d %T INFO')] 应用程序启动成功！"
       echo "[$(date '+%Y-%m-%d %T INFO')] Web 端口: 2233"
+	  echo "[$(date '+%Y-%m-%d %T INFO')] 访问 http://127.0.0.1:2233"
+	  echo "[$(date '+%Y-%m-%d %T INFO')] 用户名: $BR_USERNAME"
     } >> "${BR_INSTALL_PATH}/Application.log"
   else
     info_log "❌ 启动失败！查看最后 20 行日志："

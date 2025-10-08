@@ -2,7 +2,7 @@
 ###
 # @Author       : Gxusb
 # @Date         : 2021-08-06 10:28:46
-# @LastEditTime : 2025-10-08 20:56:57
+# @LastEditTime : 2025-10-09 02:36:40
 # @FileEncoding : -*- UTF-8 -*-
 # @Description  : 停止 BililiveRecorder 应用程序
 # @Copyright (c) 2025 by Gxusb, All Rights Reserved.
@@ -11,10 +11,13 @@
 # 获取配置文件路径
 ENV_PATH="$(dirname "$0")/config/config.ini"
 
-# 加载配置（若存在）
+# 加载配置
 if [[ -f "$ENV_PATH" ]]; then
   # shellcheck source=/dev/null
   source "$ENV_PATH"
+else
+  echo "❌ 配置文件未找到: $ENV_PATH，请先运行 install.sh" >&2
+  exit 1
 fi
 
 info_log() {
