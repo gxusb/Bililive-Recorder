@@ -1,10 +1,3 @@
-# Bililive-Recorder for MacOS/Linux
-
-上游项目 [BililiveRecorder](https://github.com/Bililive/BililiveRecorder) 地址
-
->录播姬命令行版与桌面版的功能完全一致，两个版本共用同一套核心代码，只在与用户交互的外壳代码上不同。
-录播姬命令行版与桌面版的配置文件也是通用的，可以在桌面版配置好相关参数后用命令行版加载运行。
-
 # Bililive-Recorder for macOS / Linux
 
 上游项目: https://github.com/Bililive/BililiveRecorder
@@ -115,7 +108,3 @@ systemctl status brec.service
 
 其他参考
 - 使用教程（社区）： https://lxnchan.cn/bilibili-Rec.html
-
----
-原 README 中的交互示例和帮助文本已被保留并合并到本 README 的相应部分。如果需要我可以将原始交互片段（例如房间添加流程）恢复为附录或将 README 拆分为 `README.md` + `USAGE.md`。
-`systemctl enable brec`
