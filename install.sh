@@ -1,257 +1,195 @@
 #!/bin/bash
 ###
-# @Author       : gxusb admin@gxusb.com
-# @Date         : 2021-08-05 07:58:50
-# @LastEditors  : gxusb admin@gxusb.com
-# @LastEditTime : 2022-10-03 21:24:52
-# @FilePath     : /Bililive-Recorder/install.sh
-# @FileEncoding : -*- UTF-8 -*-
-# @Description  : install bililiverecorder
-# @Copyright (c) 2022 by gxusb, All Rights Reserved.
+# BililiveRecorder CLI 安装与更新脚本
+# 支持首次安装 + 自动检测更新
 ###
 
-# 获取当前脚本的运行路径
-cur_dir=$PWD
-# 获取脚本所在的父目录  可以用来获取config.ini文件
+set -euo pipefail
+
+# 获取脚本目录
+cur_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
 ENV_PATH="$cur_dir/config/config.ini"
-# 输出日志时间格式化
-function info_log() {
-  echo -e "\\033[32;1m[$(date '+%Y-%m-%d %T INFO')]\\033[0m ${*}"
-  sleep 0.6 # 可优化运行速度 延时X秒显示输出的日志
+
+# 日志函数（支持自定义延迟）
+info_log() {
+  local msg=${1:-"test log"}
+  local delay=${2:-0.2}
+  echo -e "\033[32;1m[$(date '+%Y-%m-%d %T INFO')]\033[0m $msg"
+  [[ $delay != "0" ]] && sleep "$delay"
 }
 
-# 检查系统
-function check_sys() {
-  release=$(uname -a)
-  if [[ $release =~ "Darwin" ]]; then
-    # 判断处理器x86_64或者arm
-    if [[ $release =~ "x86_64" ]]; then
-      SYSTEM_OS_VERSION="osx-x64"
-    else
-      SYSTEM_OS_VERSION="osx-arm64"
+# 检测操作系统与架构
+detect_os() {
+  local os arch
+  case "$(uname -s)" in
+    Darwin*)
+      os="macos"
+      arch=$(uname -m)
+      SYSTEM_OS_VERSION=$([[ "$arch" == "x86_64" ]] && echo "osx-x64" || echo "osx-arm64")
+      ;;
+    Linux*)
+      os="linux"
+      arch=$(uname -m)
+      if [[ "$arch" == "x86_64" ]]; then
+        SYSTEM_OS_VERSION="linux-x64"
+      elif [[ "$arch" == "aarch64" ]]; then
+        SYSTEM_OS_VERSION="linux-arm64"
+      elif [[ "$arch" == "armv7l" ]]; then
+        SYSTEM_OS_VERSION="linux-arm"
+      else
+        info_log "不支持的架构: $arch" 0
+        exit 1
+      fi
+      ;;
+    *)
+      info_log "不支持的操作系统: $(uname -s)" 0
+      exit 1
+      ;;
+  esac
+  info_log "系统: $os ($SYSTEM_OS_VERSION)" 0.1
+}
+
+# 版本比较（仅需 version_lt）
+version_lt() { [[ "$(printf '%s\n%s' "$1" "$2" | sort -V | head -n1)" != "$1" ]]; }
+
+# 下载应用
+download_app() {
+  info_log "正在下载: $APP_URL" 0
+  for i in {1..5}; do
+    if curl -#L --connect-timeout 10 --retry 2 -o "$APP_FILE_PATH" "$APP_URL"; then
+      info_log "下载成功" 0.3
+      return 0
     fi
-    release="macos"
-  elif [[ $release =~ "centos" ]]; then
-    if [[ $release =~ "x86_64" ]]; then
-      SYSTEM_OS_VERSION="linux-x64"
-    elif [[ $release =~ "aarch64" ]]; then
-      SYSTEM_OS_VERSION="linux-arm64"
-    else
-      SYSTEM_OS_VERSION="linux-arm"
-    fi
-    release="centos"
-  elif [[ $release =~ "ubuntu" ]]; then
-    if [[ $release =~ "x86_64" ]]; then
-      SYSTEM_OS_VERSION="linux-x64"
-    elif [[ $release =~ "aarch64" ]]; then
-      SYSTEM_OS_VERSION="linux-arm64"
-    else
-      SYSTEM_OS_VERSION="linux-arm"
-    fi
-    release="ubuntu"
-  elif [[ $release =~ "debian" ]]; then
-    if [[ $release =~ "x86_64" ]]; then
-      SYSTEM_OS_VERSION="linux-x64"
-    elif [[ $release =~ "aarch64" ]]; then
-      SYSTEM_OS_VERSION="linux-arm64"
-    else
-      SYSTEM_OS_VERSION="linux-arm"
-    fi
-    release="debian"
-  else
-    echo "uname -a :$release"
-  fi
-  info_log "您当前的操作系统是: ${release} ${SYSTEM_OS_VERSION}"
-  if [ -z "${SYSTEM_OS_VERSION}" ]; then
-    info_log "没有获取到操作系统版本信息"
+    info_log "第 $i 次下载失败，重试..." 1
+  done
+  info_log "下载失败，请检查网络或代理设置" 0
+  exit 1
+}
+
+# 解压并部署
+deploy_app() {
+  info_log "解压安装包..." 0
+  mkdir -p "$BR_INSTALL_PATH/unzip"
+  if ! unzip -q -o "$APP_FILE_PATH" -d "$BR_INSTALL_PATH/unzip"; then
+    info_log "解压失败" 0
+    rm -f "$APP_FILE_PATH"
     exit 1
   fi
+
+  rm -rf "$BR_INSTALL_PATH/Application"
+  if [[ -d "$BR_INSTALL_PATH/unzip/Release" ]]; then
+    mv "$BR_INSTALL_PATH/unzip/Release" "$BR_INSTALL_PATH/Application"
+  else
+    mv "$BR_INSTALL_PATH/unzip" "$BR_INSTALL_PATH/Application"
+  fi
+  rm -rf "$BR_INSTALL_PATH/unzip"
+  rm -f "$APP_FILE_PATH"
+
+  chmod +x "$BR_INSTALL_PATH/Application/BililiveRecorder.Cli"
+  info_log "部署完成" 0.3
 }
 
-info_log "加载的配置文件路径 $ENV_PATH"
-# 本地模式
-if [ -f "${ENV_PATH}" ]; then
-  info_log "从config.ini文件获取配置信息"
-  # shellcheck disable=SC1090
-  source "$ENV_PATH"
-  if [ "$BR_USE_PROXY" -eq 1 ]; then
-    info_log "使用代理"
-  else
-    info_log "不使用代理"
-    BR_GITHUB_PROXY=""
-  fi
-else
-  info_log "没有配置文件，采用脚本自带配置"
-  BR_INSTALL_PATH="${cur_dir}"
-  BR_GITHUB_PROXY="https://git.scisys.top/"
-fi
-
-# 配置文件路径
-CONFIG_FILE_PATH="${BR_INSTALL_PATH}/Downloads/config.json"
-#app版本记录路径
-APP_LOCAL_VERSION="${BR_INSTALL_PATH}/config/app_version.txt"
-
-# 检查操作系统信息
-check_sys
-# 判断SYSTEM_OS_VERSION是否存在
-if [ -z "$SYSTEM_OS_VERSION" ]; then
-  info_log "您的操作系统不支持"
-  exit 1
-fi
-# 获取运程版本信息
-APP_VERSION=$(curl -sL https://api.github.com/repos/Bililive/BililiveRecorder/releases/latest | grep "tag_name" | head -n 1 | awk -F ":" '{print $2}' | sed 's/\"//g;s/,//g;s/ //g')
-if [ -z "$APP_VERSION" ]; then
-  info_log "获取版本信息失败"
-  exit 1
-fi
-APP_URL="${BR_GITHUB_PROXY}https://github.com/Bililive/BililiveRecorder/releases/download/${APP_VERSION}/BililiveRecorder-CLI-${SYSTEM_OS_VERSION}.zip"
-# 判断URL文件是否200 循环5次
-APP_FILE_FATH="${BR_INSTALL_PATH}/BililiveRecorder-CLI-${SYSTEM_OS_VERSION}-${APP_VERSION}.zip"
-# 初始化config.json
-function init_the_config_json_file() {
-  info_log "初始化配置文件 $CONFIG_FILE_PATH"
-  if [ -f "$CONFIG_FILE_PATH" ]; then
-    info_log "配置文件 config.json 已存在，无需初始化"
-  else
-    info_log "配置文件 config.json 不存在，开始初始化"
-    cat <<-EFO >"$CONFIG_FILE_PATH"
+# 初始化 config.json（仅首次）
+init_config_json() {
+  local cfg="$BR_INSTALL_PATH/Downloads/config.json"
+  if [[ ! -f "$cfg" ]]; then
+    info_log "初始化 config.json" 0
+    mkdir -p "$(dirname "$cfg")"
+    cat >"$cfg" <<EOF
 {"\$schema":"https://raw.githubusercontent.com/Bililive/BililiveRecorder/dev-1.3/configV2.schema.json","version":2,"global":{},"rooms":[]}
-EFO
-    info_log "配置文件初始化完成"
+EOF
   fi
 }
-# 创建安装目录
-function create_directory() {
-  info_log "创建目录"
-  mkdir -pv "$BR_INSTALL_PATH"/{Application,config,Downloads,Logs}
-  info_log "安装目录已创建"
+
+# 首次配置（仅当 config.ini 不存在时）
+first_time_setup() {
+  info_log "首次运行，请配置基本信息" 0.3
+
+  local use_proxy username password
+  read -rp "是否使用代理？(0=否, 1=是) [0]: " use_proxy
+  use_proxy=${use_proxy:-0}
+
+  read -rp "HTTP Basic 用户名 [admin]: " username
+  username=${username:-admin}
+
+  read -rsp "HTTP Basic 密码 [自动生成]: " password
+  echo
+  password=${password:-$(head -c 16 /dev/urandom | xxd -ps | cut -c1-8)}
+
+  info_log "用户名: $username，密码: ${password:0:2}****" 0
+
+  mkdir -p "$(dirname "$ENV_PATH")"
+  cat >"$ENV_PATH" <<EOF
+BR_INSTALL_PATH=$BR_INSTALL_PATH
+BR_GITHUB_PROXY=$BR_GITHUB_PROXY
+BR_USE_PROXY=$use_proxy
+BR_USERNAME=$username
+BR_PASSWORD=$password
+EOF
+  info_log "配置已保存: $ENV_PATH" 0.3
 }
-# 下载安装包
-function download_app() {
-  info_log "开始下载文件"
-  info_log "下载地址 $APP_URL"
-  # curl -Lo# "${APP_FILE_FATH}" "$APP_URL"
-  # 判断是否下载success
-  if wget --no-check-certificate -L -O "${APP_FILE_FATH}" "$APP_URL"; then
-    info_log "下载完成"
+
+# 创建必要目录
+create_dirs() {
+  mkdir -p "$BR_INSTALL_PATH"/{Application,config,Downloads,Logs}
+}
+
+# 主逻辑
+main() {
+  # === 1. 加载或初始化配置 ===
+  if [[ -f "$ENV_PATH" ]]; then
+    info_log "加载配置: $ENV_PATH" 0.1
+	# shellcheck disable=SC1090
+    source "$ENV_PATH"
+    [[ "$BR_USE_PROXY" -eq 1 ]] || BR_GITHUB_PROXY=""
   else
-    info_log "下载失败"
-    for i in {1..5}; do
-      info_log "第${i}次重试"
-      sleep 1
-      if wget -q --no-check-certificate -L -O "${APP_FILE_FATH}" "$APP_URL"; then
-        info_log "下载完成"
-        break
-      fi
-    done
+    info_log "未检测到配置文件，进入首次安装模式" 0.3
+    BR_INSTALL_PATH="$cur_dir"
+    BR_GITHUB_PROXY="https://git-proxy.gxusb.com/"
+    first_time_setup
+	# shellcheck disable=SC1090
+    source "$ENV_PATH"  # 重新加载
   fi
-}
-# 解压安装包  并删除安装包
-function upzip_file() {
-  if [ -f "${APP_FILE_FATH}" ]; then
-    info_log "已检测到 ${APP_FILE_FATH} 文件"
-    # if unzip -t "${APP_FILE_FATH}"; then
-    #   info_log "压缩包完整"
-    # else
-    #   info_log "压缩包不完整"
-    # fi
-    info_log "开始解压"
-    # 判断压缩包是否解压完成
-    if unzip -q -o "${APP_FILE_FATH}" -d "${BR_INSTALL_PATH}/unzip"; then
-      info_log "解压完成 删除安装包"
-      info_log "$(rm -fv "${APP_FILE_FATH}")"
-      cd "$BR_INSTALL_PATH" || exit
-      info_log "删除 Application 目录"
-      rm -rf Application/
-      info_log "把解压文件移动到 Application 目录"
-      if [ -d "${BR_INSTALL_PATH}/unzip/Release" ]; then
-        info_log "Release文件夹已存在，开始移动"
-        mv -v "${BR_INSTALL_PATH}/unzip/Release" "${BR_INSTALL_PATH}/Application"
-        info_log "移动完成"
-      else
-        info_log "Release文件夹不存在，开始移动"
-        info_log "$(mv -v "${BR_INSTALL_PATH}/unzip" "${BR_INSTALL_PATH}/Application")"
-        info_log "移动完成"
-      fi
-      info_log "删除解压文件"
-      rm -rfv "${BR_INSTALL_PATH}"/unzip # 删除文件夹
-      info_log "设置文件可执行权限 Application/BililiveRecorder.Cli"
-      chmod +x Application/BililiveRecorder.Cli
-    else
-      info_log "解压失败"
-      rm "${APP_FILE_FATH}"
-      exit 1
-    fi
+
+  # === 2. 检测系统 ===
+  detect_os
+
+  # === 3. 获取远程版本 ===
+  APP_VERSION=$(curl -sL "https://api.github.com/repos/Bililive/BililiveRecorder/releases/latest" | grep '"tag_name"' | head -n1 | cut -d'"' -f4)
+  if [[ -z "$APP_VERSION" ]]; then
+    info_log "获取远程版本失败" 0
+    exit 1
+  fi
+
+  APP_URL="${BR_GITHUB_PROXY}https://github.com/Bililive/BililiveRecorder/releases/download/${APP_VERSION}/BililiveRecorder-CLI-${SYSTEM_OS_VERSION}.zip"
+  APP_FILE_PATH="${BR_INSTALL_PATH}/BililiveRecorder-CLI-${SYSTEM_OS_VERSION}-${APP_VERSION}.zip"
+
+  # === 4. 检查本地版本 ===
+  LOCAL_VERSION_FILE="$BR_INSTALL_PATH/config/app_version.txt"
+  if [[ -f "$LOCAL_VERSION_FILE" ]]; then
+    APP_LOCAL_VERSION=$(grep -oE 'v[0-9].*' "$LOCAL_VERSION_FILE" | head -n1)
   else
-    info_log "文件不存在，请检查是否下载成功"
+    APP_LOCAL_VERSION=""
   fi
-  info_log "当前目录 $PWD"
-}
 
-function set_local_version_info() {
-  info_log "记录当前版本信信息"
-  info_log "当前版本号 $APP_VERSION"
-  info_log "当前安装目录 $BR_INSTALL_PATH"
-  info_log "当前系统信息 $release $SYSTEM_OS_VERSION"
-  info_log "把版本信息（${APP_VERSION}）写入 $APP_LOCAL_VERSION"
-  echo "${APP_VERSION}" >"$APP_LOCAL_VERSION"
-
-  info_log "是否使用代理  0: 不使用 1: 使用"
-  read -rep "请输入对应的数字 (默认不使用) ：" USE_PROXY
-  [[ -z "$USE_PROXY" ]] && USE_PROXY="0"
-  read -rep "请输入 HTTP Basic 登录用户名 (默认 admin) : " USERNAME
-  [[ -z "$USERNAME" ]] && USERNAME="admin"
-  read -rep "请输入 HTTP Basic 登录密码 (默认 8位随机密码) : " PASSWORD
-  [[ -z "$PASSWORD" ]] && PASSWORD="$(head -c 16 /dev/urandom | xxd -ps | cut -c 1-8)"
-  info_log "HTTP Basic 登录用户名：$USERNAME 密码：$PASSWORD"
-
-  # 判断文件是否存在
-  if [ -f "$ENV_PATH" ]; then
-    info_log "程序设置文件已存在"
-    read -rep "是否覆盖程序设置文件 (y/n 默认y) : " config_file_option
-    if [[ -z "$config_file_option" ]]; then
-      info_log "本次写入程序设置"
-      write_configuration
-    else
-      if [[ "$config_file_option" == "n" || "$config_file_option" == "N" ]]; then
-        info_log "本次不写入程序设置"
-      else
-        info_log "写入程序设置"
-        write_configuration
-      fi
-    fi
+  # === 5. 决策：安装 or 更新 ===
+  if [[ -z "$APP_LOCAL_VERSION" ]]; then
+    info_log "首次安装 BililiveRecorder $APP_VERSION" 0.3
+    create_dirs
+    init_config_json
+    download_app
+    deploy_app
+    echo "$APP_VERSION" > "$LOCAL_VERSION_FILE"
+    info_log "✅ 首次安装完成！运行 ./start.sh 启动服务。" 0
+  elif version_lt "$APP_LOCAL_VERSION" "$APP_VERSION"; then
+    info_log "发现新版本：$APP_LOCAL_VERSION → $APP_VERSION" 0.3
+    download_app
+    deploy_app
+    echo "$APP_VERSION" > "$LOCAL_VERSION_FILE"
+    info_log "✅ 更新完成！" 0
   else
-    info_log "程序设置文件不存在, 开始创建"
-    : >"$ENV_PATH"
-    write_configuration
+    info_log "已是最新版本：$APP_VERSION，无需更新。" 0
   fi
 }
 
-function write_configuration() {
-  cat <<-EFO >"$ENV_PATH"
-# 手动移动目录，要修改安装目录
-BR_INSTALL_PATH="$(printf '%s' "$BR_INSTALL_PATH")"
-# CDN Proxy address 
-BR_GITHUB_PROXY="$BR_GITHUB_PROXY"
-# 是否使用代理  0: 不使用  1: 使用
-BR_USE_PROXY="$USE_PROXY"
-# HTTP Basic 登录功能
-BR_USERNAME="$USERNAME"
-BR_PASSWORD="$PASSWORD"
-EFO
-}
-
-# 程序运行流程
-function main() {
-  create_directory
-  # 初始化配置文件
-  init_the_config_json_file
-  # 下载安装包
-  download_app
-  # 解压安装包
-  upzip_file
-  # 记录版本信息
-  set_local_version_info
-}
-# 启动程序
 main
