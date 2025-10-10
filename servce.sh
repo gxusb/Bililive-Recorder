@@ -2,29 +2,29 @@
 ###
 # @Author       : Gxusb
 # @Date         : 2021-08-07 14:25:21
-# @LastEditTime : 2025-10-09 03:07:53
+# @LastEditTime : 2025-10-10 20:35:19
 # @FileEncoding : -*- UTF-8 -*-
-# @Description  : 跨平台 BililiveRecorder 服务管理（Linux systemd + macOS launchd）
+# @Description  : 跨平台 BililiveRecorder 服务管理(Linux systemd + macOS launchd)
 # @Copyright (c) 2025 by Gxusb, All Rights Reserved.
 ###
 
 set -euo pipefail
 
-# 获取脚本目录
 SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
 ENV_PATH="$SCRIPT_DIR/config/config.ini"
 
-# 加载配置
+# load config
 if [[ -f "$ENV_PATH" ]]; then
   # shellcheck source=/dev/null
   source "$ENV_PATH"
 else
-  echo "❌ 配置文件未找到: $ENV_PATH，请先运行 install.sh"
+  echo "[31m[ERROR][0m config not found: $ENV_PATH, run install.sh"
   exit 1
 fi
 
+# unified log helper
 info_log() {
-  echo -e "\\033[32;1m[$(date '+%Y-%m-%d %T INFO')]\\033[0m $*"
+  echo -e "\033[32;1m[$(date '+%Y-%m-%d %T INFO')]\033[0m $*"
 }
 
 # === 系统检测 ===

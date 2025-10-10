@@ -2,7 +2,7 @@
 ###
 # @Author       : Gxusb
 # @Date         : 2021-08-06 10:13:36
-# @LastEditTime : 2025-10-09 02:33:59
+# @LastEditTime : 2025-10-10 20:18:05
 # @FileEncoding : -*- UTF-8 -*-
 # @Description  : 启动 BililiveRecorder 应用程序
 # @Copyright (c) 2025 by Gxusb, All Rights Reserved.
@@ -10,7 +10,6 @@
 
 set -euo pipefail
 
-# 获取脚本目录（更可靠）
 SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
 ENV_PATH="$SCRIPT_DIR/config/config.ini"
 
@@ -23,29 +22,26 @@ else
   exit 1
 fi
 
-# 日志函数
 info_log() {
   echo -e "\\033[32;1m[$(date '+%Y-%m-%d %T INFO')]\\033[0m $*"
 }
 
-# 安全停止进程
 safe_stop() {
   local bin="BililiveRecorder.Cli"
-  # 使用 pgrep -f 但排除自身（避免脚本名匹配）
   local pids
+  # 排除当前 shell 进程（$$）
   pids=$(pgrep -f "$bin" | grep -v "$$" || true)
 
   if [[ -n "$pids" ]]; then
     info_log "检测到运行中的进程 (PID: $pids)，尝试优雅停止..."
     kill "$pids" 2>/dev/null
 
-    local i=0
-    while pgrep -f "$bin" > /dev/null 2>&1 && [[ $i -lt 10 ]]; do
+    for _ in {1..10}; do
+      pgrep -f "$bin" >/dev/null 2>&1 || return 0
       sleep 1
-      ((i++))
     done
 
-    if pgrep -f "$bin" > /dev/null 2>&1; then
+    if pgrep -f "$bin" >/dev/null 2>&1; then
       info_log "进程未退出，强制终止..."
       kill -9 "$pids" 2>/dev/null
     fi
@@ -56,17 +52,15 @@ safe_stop() {
   fi
 }
 
-# 日志归档
 log_archive() {
-  local log_file="${BR_INSTALL_PATH}/Application.log"
-  local log_dir="${BR_INSTALL_PATH}/Logs"
+  local log_dir log_file archive
+  log_dir="${BR_INSTALL_PATH}/Logs"
+  log_file="${BR_INSTALL_PATH}/Application.log"
+  archive="${log_dir}/$(date +%Y-%m-%d)-Application.log"
   mkdir -p "$log_dir"
 
   if [[ -f "$log_file" ]]; then
-    local today=$(date +%Y-%m-%d)
-    local archive="${log_dir}/${today}-Application.log"
     info_log "归档日志到: $archive"
-    # 避免重复归档：可选追加或覆盖（此处追加）
     cat "$log_file" >> "$archive"
     rm -f "$log_file"
   else
@@ -74,42 +68,41 @@ log_archive() {
   fi
 }
 
-# 启动主程序
 run_app() {
   local cli="${BR_INSTALL_PATH}/Application/BililiveRecorder.Cli"
+  local download_dir="${BR_INSTALL_PATH}/Downloads"
 
-  if [[ ! -f "$cli" ]]; then
-    info_log "[ERROR] 可执行文件不存在: $cli"
-    info_log "请先运行 ./install.sh 安装程序"
-    exit 1
-  fi
-
-  if [[ ! -x "$cli" ]]; then
-    info_log "[WARN] 文件不可执行，尝试添加执行权限"
-    chmod +x "$cli" || { info_log "[ERROR] 权限设置失败"; exit 1; }
-  fi
+  # 校验 CLI
+  [[ -f "$cli" ]] || { info_log "[ERROR] 可执行文件不存在: $cli"; exit 1; }
+  [[ -x "$cli" ]] || { info_log "[WARN] 添加执行权限"; chmod +x "$cli" || exit 1; }
+  [[ -d "$download_dir" ]] || mkdir -p "$download_dir"
 
   safe_stop
   log_archive
 
+  # 构建启动参数
+  local args=(run --bind "http://*:2233" "$download_dir")
+  if [[ -n "${BR_PASSWORD:-}" ]]; then
+    args+=(--http-basic-user "$BR_USERNAME" --http-basic-pass "$BR_PASSWORD")
+    info_log "启用 HTTP Basic 认证（用户名: $BR_USERNAME）"
+  else
+    info_log "未设置密码，以无认证模式启动"
+  fi
+
   info_log "正在启动 BililiveRecorder..."
-  nohup "$cli" run \
-    --bind "http://*:2233" \
-    --http-basic-user "$BR_USERNAME" \
-    --http-basic-pass "$BR_PASSWORD" \
-    "$BR_INSTALL_PATH/Downloads" \
-    >> "${BR_INSTALL_PATH}/Application.log" 2>&1 &
+  nohup "$cli" "${args[@]}" >> "${BR_INSTALL_PATH}/Application.log" 2>&1 &
 
   sleep 2
 
-  # 精确检查进程（避免匹配到 grep 或脚本）
-  if pgrep -f "BililiveRecorder.Cli.*run" > /dev/null; then
-    info_log "✅ 应用程序启动成功！访问 http://127.0.0.1:2233"
+  # 精确检测：匹配完整命令特征
+  if pgrep -f "BililiveRecorder.Cli.*run.*${download_dir}" >/dev/null; then
+    info_log "✅ 启动成功！访问 http://127.0.0.1:2233"
+
     {
       echo "[$(date '+%Y-%m-%d %T INFO')] 应用程序启动成功！"
       echo "[$(date '+%Y-%m-%d %T INFO')] Web 端口: 2233"
-	  echo "[$(date '+%Y-%m-%d %T INFO')] 访问 http://127.0.0.1:2233"
-	  echo "[$(date '+%Y-%m-%d %T INFO')] 用户名: $BR_USERNAME"
+      echo "[$(date '+%Y-%m-%d %T INFO')] 访问地址: http://127.0.0.1:2233"
+      [[ -n "${BR_PASSWORD:-}" ]] && echo "[$(date '+%Y-%m-%d %T INFO')] 用户名: $BR_USERNAME"
     } >> "${BR_INSTALL_PATH}/Application.log"
   else
     info_log "❌ 启动失败！查看最后 20 行日志："

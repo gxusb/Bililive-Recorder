@@ -1,19 +1,24 @@
 #!/bin/bash
 ###
-# BililiveRecorder CLI 安装与更新脚本
-# 支持首次安装 + 自动检测更新
+# @Author       : Gxusb
+# @Date         : 2021-08-07 14:25:21
+# @LastEditTime : 2025-10-10 20:40:21
+# @FileEncoding : -*- UTF-8 -*-
+# @Description  : BililiveRecorder CLI 安装与更新脚本 支持首次安装 + 自动检测更新
+# @Copyright (c) 2025 by Gxusb, All Rights Reserved.
 ###
 
 set -euo pipefail
 
 # 获取脚本目录
-cur_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
-ENV_PATH="$cur_dir/config/config.ini"
+SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
+ENV_PATH="$SCRIPT_DIR/config/config.ini"
 
 # 日志函数（支持自定义延迟）
 info_log() {
-  local msg=${1:-"test log"}
-  local delay=${2:-0.2}
+  # usage: info_log "message" [delay_seconds]
+  local msg=${1:-}
+  local delay=${2:-0}
   echo -e "\033[32;1m[$(date '+%Y-%m-%d %T INFO')]\033[0m $msg"
   [[ $delay != "0" ]] && sleep "$delay"
 }
@@ -144,7 +149,7 @@ main() {
     [[ "$BR_USE_PROXY" -eq 1 ]] || BR_GITHUB_PROXY=""
   else
     info_log "未检测到配置文件，进入首次安装模式" 0.3
-    BR_INSTALL_PATH="$cur_dir"
+    BR_INSTALL_PATH="$SCRIPT_DIR"
     BR_GITHUB_PROXY="https://git-proxy.gxusb.com/"
     first_time_setup
 	# shellcheck disable=SC1090

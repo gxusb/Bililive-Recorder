@@ -2,26 +2,29 @@
 ###
 # @Author       : Gxusb
 # @Date         : 2021-08-06 10:28:46
-# @LastEditTime : 2025-10-09 02:36:40
+# @LastEditTime : 2025-10-10 20:44:58
 # @FileEncoding : -*- UTF-8 -*-
 # @Description  : 停止 BililiveRecorder 应用程序
 # @Copyright (c) 2025 by Gxusb, All Rights Reserved.
 ###
 
-# 获取配置文件路径
-ENV_PATH="$(dirname "$0")/config/config.ini"
+set -euo pipefail
 
-# 加载配置
+SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
+ENV_PATH="$SCRIPT_DIR/config/config.ini"
+
+# load config
 if [[ -f "$ENV_PATH" ]]; then
   # shellcheck source=/dev/null
   source "$ENV_PATH"
 else
-  echo "❌ 配置文件未找到: $ENV_PATH，请先运行 install.sh" >&2
+  echo "[31m[ERROR][0m config not found: $ENV_PATH, run install.sh" >&2
   exit 1
 fi
 
+# unified log helper
 info_log() {
-  echo -e "\\033[32;1m[$(date '+%Y-%m-%d %T INFO')]\\033[0m $*"
+  echo -e "\033[32;1m[$(date '+%Y-%m-%d %T INFO')]\033[0m $*"
 }
 
 # 安全停止 BililiveRecorder
