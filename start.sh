@@ -2,7 +2,7 @@
 ###
 # @Author       : Gxusb
 # @Date         : 2021-08-06 10:13:36
-# @LastEditTime : 2025-10-10 20:18:05
+# @LastEditTime : 2025-10-10 21:29:19
 # @FileEncoding : -*- UTF-8 -*-
 # @Description  : 启动 BililiveRecorder 应用程序
 # @Copyright (c) 2025 by Gxusb, All Rights Reserved.
@@ -46,7 +46,7 @@ safe_stop() {
       kill -9 "$pids" 2>/dev/null
     fi
 
-    echo "[$(date '+%Y-%m-%d %T INFO')] 应用程序已停止。" >> "${BR_INSTALL_PATH}/Application.log"
+    echo "[$(date '+%Y-%m-%d %T INFO')] 应用程序已停止。" >>"${BR_INSTALL_PATH}/Application.log"
   else
     info_log "未检测到运行中的进程。"
   fi
@@ -61,7 +61,7 @@ log_archive() {
 
   if [[ -f "$log_file" ]]; then
     info_log "归档日志到: $archive"
-    cat "$log_file" >> "$archive"
+    cat "$log_file" >>"$archive"
     rm -f "$log_file"
   else
     info_log "无日志文件可归档 ($log_file 不存在)"
@@ -73,8 +73,14 @@ run_app() {
   local download_dir="${BR_INSTALL_PATH}/Downloads"
 
   # 校验 CLI
-  [[ -f "$cli" ]] || { info_log "[ERROR] 可执行文件不存在: $cli"; exit 1; }
-  [[ -x "$cli" ]] || { info_log "[WARN] 添加执行权限"; chmod +x "$cli" || exit 1; }
+  [[ -f "$cli" ]] || {
+    info_log "[ERROR] 可执行文件不存在: $cli"
+    exit 1
+  }
+  [[ -x "$cli" ]] || {
+    info_log "[WARN] 添加执行权限"
+    chmod +x "$cli" || exit 1
+  }
   [[ -d "$download_dir" ]] || mkdir -p "$download_dir"
 
   safe_stop
@@ -90,7 +96,7 @@ run_app() {
   fi
 
   info_log "正在启动 BililiveRecorder..."
-  nohup "$cli" "${args[@]}" >> "${BR_INSTALL_PATH}/Application.log" 2>&1 &
+  nohup "$cli" "${args[@]}" >>"${BR_INSTALL_PATH}/Application.log" 2>&1 &
 
   sleep 2
 
@@ -103,7 +109,7 @@ run_app() {
       echo "[$(date '+%Y-%m-%d %T INFO')] Web 端口: 2233"
       echo "[$(date '+%Y-%m-%d %T INFO')] 访问地址: http://127.0.0.1:2233"
       [[ -n "${BR_PASSWORD:-}" ]] && echo "[$(date '+%Y-%m-%d %T INFO')] 用户名: $BR_USERNAME"
-    } >> "${BR_INSTALL_PATH}/Application.log"
+    } >>"${BR_INSTALL_PATH}/Application.log"
   else
     info_log "❌ 启动失败！查看最后 20 行日志："
     tail -n 20 "${BR_INSTALL_PATH}/Application.log" || true

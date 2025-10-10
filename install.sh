@@ -27,29 +27,29 @@ info_log() {
 detect_os() {
   local os arch
   case "$(uname -s)" in
-    Darwin*)
-      os="macos"
-      arch=$(uname -m)
-      SYSTEM_OS_VERSION=$([[ "$arch" == "x86_64" ]] && echo "osx-x64" || echo "osx-arm64")
-      ;;
-    Linux*)
-      os="linux"
-      arch=$(uname -m)
-      if [[ "$arch" == "x86_64" ]]; then
-        SYSTEM_OS_VERSION="linux-x64"
-      elif [[ "$arch" == "aarch64" ]]; then
-        SYSTEM_OS_VERSION="linux-arm64"
-      elif [[ "$arch" == "armv7l" ]]; then
-        SYSTEM_OS_VERSION="linux-arm"
-      else
-        info_log "不支持的架构: $arch" 0
-        exit 1
-      fi
-      ;;
-    *)
-      info_log "不支持的操作系统: $(uname -s)" 0
+  Darwin*)
+    os="macos"
+    arch=$(uname -m)
+    SYSTEM_OS_VERSION=$([[ "$arch" == "x86_64" ]] && echo "osx-x64" || echo "osx-arm64")
+    ;;
+  Linux*)
+    os="linux"
+    arch=$(uname -m)
+    if [[ "$arch" == "x86_64" ]]; then
+      SYSTEM_OS_VERSION="linux-x64"
+    elif [[ "$arch" == "aarch64" ]]; then
+      SYSTEM_OS_VERSION="linux-arm64"
+    elif [[ "$arch" == "armv7l" ]]; then
+      SYSTEM_OS_VERSION="linux-arm"
+    else
+      info_log "不支持的架构: $arch" 0
       exit 1
-      ;;
+    fi
+    ;;
+  *)
+    info_log "不支持的操作系统: $(uname -s)" 0
+    exit 1
+    ;;
   esac
   info_log "系统: $os ($SYSTEM_OS_VERSION)" 0.1
 }
@@ -144,7 +144,7 @@ main() {
   # === 1. 加载或初始化配置 ===
   if [[ -f "$ENV_PATH" ]]; then
     info_log "加载配置: $ENV_PATH" 0.1
-	# shellcheck disable=SC1090
+    # shellcheck disable=SC1090
     source "$ENV_PATH"
     [[ "$BR_USE_PROXY" -eq 1 ]] || BR_GITHUB_PROXY=""
   else
@@ -152,8 +152,8 @@ main() {
     BR_INSTALL_PATH="$SCRIPT_DIR"
     BR_GITHUB_PROXY="https://git-proxy.gxusb.com/"
     first_time_setup
-	# shellcheck disable=SC1090
-    source "$ENV_PATH"  # 重新加载
+    # shellcheck disable=SC1090
+    source "$ENV_PATH" # 重新加载
   fi
 
   # === 2. 检测系统 ===
@@ -185,13 +185,13 @@ main() {
     init_config_json
     download_app
     deploy_app
-    echo "$APP_VERSION" > "$LOCAL_VERSION_FILE"
+    echo "$APP_VERSION" >"$LOCAL_VERSION_FILE"
     info_log "✅ 首次安装完成！运行 ./start.sh 启动服务。" 0
   elif version_lt "$APP_LOCAL_VERSION" "$APP_VERSION"; then
     info_log "发现新版本：$APP_LOCAL_VERSION → $APP_VERSION" 0.3
     download_app
     deploy_app
-    echo "$APP_VERSION" > "$LOCAL_VERSION_FILE"
+    echo "$APP_VERSION" >"$LOCAL_VERSION_FILE"
     info_log "✅ 更新完成！" 0
   else
     info_log "已是最新版本：$APP_VERSION ，无需更新。" 0

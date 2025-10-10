@@ -2,7 +2,7 @@
 ###
 # @Author       : Gxusb
 # @Date         : 2021-08-06 10:28:46
-# @LastEditTime : 2025-10-10 20:44:58
+# @LastEditTime : 2025-10-10 21:41:02
 # @FileEncoding : -*- UTF-8 -*-
 # @Description  : 停止 BililiveRecorder 应用程序
 # @Copyright (c) 2025 by Gxusb, All Rights Reserved.
@@ -29,7 +29,7 @@ info_log() {
 
 # 安全停止 BililiveRecorder
 stop_BililiveRecorder() {
-  local bin_name="BililiveRecorder.Cli"  # 更精确的二进制名（避免误杀）
+  local bin_name="BililiveRecorder.Cli" # 更精确的二进制名（避免误杀）
   local pids
 
   # 获取精确匹配的进程 PID（避免脚本名、路径等干扰）
@@ -57,7 +57,7 @@ stop_BililiveRecorder() {
     fi
 
     # 记录日志
-    echo "[$(date '+%Y-%m-%d %T INFO')] 应用程序已停止。" >> "${BR_INSTALL_PATH}/Application.log"
+    echo "[$(date '+%Y-%m-%d %T INFO')] 应用程序已停止。" >>"${BR_INSTALL_PATH}/Application.log"
     info_log "BililiveRecorder 已停止。"
   else
     info_log "未检测到运行中的 BililiveRecorder 进程。"
