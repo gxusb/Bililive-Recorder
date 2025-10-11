@@ -1,10 +1,11 @@
 # Bililive-Recorder for macOS / Linux
 
-上游项目: https://github.com/Bililive/BililiveRecorder
+上游项目: <https://github.com/Bililive/BililiveRecorder>
 
 录播姬的命令行版本（CLI）与桌面版共享同一套核心代码。此仓库提供了包装脚本，用于在 macOS / Linux 上安装、配置、启动与管理 CLI 服务。
 
 快速上手
+
 1. 克隆仓库并运行安装脚本（首次运行会交互生成 `config/config.ini`）：
 
 ```bash
@@ -33,12 +34,14 @@ bash install.sh
 ```
 
 主要目录与文件
+
 - `Application/`：已解压的发行包（包含 `BililiveRecorder.Cli` 二进制与 .dll）。不要修改这些二进制文件。
 - `config/config.ini`：所有脚本读取的环境变量（`BR_INSTALL_PATH`、`BR_USERNAME`、`BR_PASSWORD`、`BR_USE_PROXY` 等）。`install.sh` 在首次运行会生成它。
 - `Downloads/`：录制输出目录，`config.json`（若不存在，`install.sh` 会生成默认的 `Downloads/config.json`）。
 - `Logs/`：脚本会将旧的 `Application.log` 归档到这里（`YYYY-MM-DD-Application.log`）。
 
 常用命令示例
+
 - 直接运行（示例 macOS 路径）：
 
 ```bash
@@ -75,6 +78,7 @@ WantedBy=multi-user.target
 提示：仓库内的 `servce.sh` 提供了 `Create_service` / `Delete_service` 的辅助函数，会生成 `/etc/systemd/system/brec.service` 并调用 `systemctl daemon-reload`。
 
 实现细节与注意事项
+
 - 所有 shell 脚本遵循 `set -euo pipefail` 风格，包含辅助函数 `info_log()`, `safe_stop()`, `log_archive()`。新增脚本请保持相同风格。
 - `install.sh` 会检测操作系统与架构（例如 `osx-x64`, `osx-arm64`, `linux-x64`, `linux-arm64`），并下载匹配的发行包：
 
@@ -86,10 +90,11 @@ APP_URL="https://github.com/Bililive/BililiveRecorder/releases/download/${APP_VE
 - 日志归档：`start.sh` 在启动前会把现有的 `Application.log` 追加到 `Logs/YYYY-MM-DD-Application.log` 并删除原文件（以避免无限增大）。不要删除此归档逻辑。
 - `config/config.ini` 是脚本之间的契约：不要随意修改加载路径或变量名（除非同时更新所有引用脚本并在 PR 中注明）。
 - 不要修改 `Application/` 下的二进制或已编译库（`.dll`, `.dylib`, `BililiveRecorder.Cli` 等）。所有功能性修改应通过：
-	- 调整 `config/config.ini` / `Downloads/config.json`，或
-	- 修改并测试脚本（保持脚本风格与错误处理）。
+  - 调整 `config/config.ini` / `Downloads/config.json`，或
+  - 修改并测试脚本（保持脚本风格与错误处理）。
 
 常见问题与故障排查（快速清单）
+
 - 启动失败：检查 `${BR_INSTALL_PATH}/Application.log` 的最后 20 行（`tail -n 20 ${BR_INSTALL_PATH}/Application.log`）。
 - 找不到 `config/config.ini`：如果脚本提示找不到配置，请先运行 `bash install.sh`（首次运行会交互生成该文件）。
 - 权限问题：确保 `Application/BililiveRecorder.Cli` 可执行：
@@ -107,4 +112,5 @@ systemctl status brec.service
 ```
 
 其他参考
-- 使用教程（社区）： https://lxnchan.cn/bilibili-Rec.html
+
+- 使用教程（社区）： <https://lxnchan.cn/bilibili-Rec.html>

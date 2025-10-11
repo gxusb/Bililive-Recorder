@@ -2,7 +2,7 @@
 ###
 # @Author       : Gxusb
 # @Date         : 2021-08-07 14:25:21
-# @LastEditTime : 2025-10-10 20:35:19
+# @LastEditTime : 2025-10-11 08:31:36
 # @FileEncoding : -*- UTF-8 -*-
 # @Description  : 跨平台 BililiveRecorder 服务管理(Linux systemd + macOS launchd)
 # @Copyright (c) 2025 by Gxusb, All Rights Reserved.
@@ -180,10 +180,16 @@ EOF
 
     read -rp "请选择 [1-3]: " choice
     case "$choice" in
-      1) "$create_fn" ;;
-      2) "$delete_fn" ;;
-      3) info_log "退出"; exit 0 ;;
-      *) echo "❌ 无效选项"; sleep 1 ;;
+    1) "$create_fn" ;;
+    2) "$delete_fn" ;;
+    3)
+      info_log "退出"
+      exit 0
+      ;;
+    *)
+      echo "❌ 无效选项"
+      sleep 1
+      ;;
     esac
   done
 }
