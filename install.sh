@@ -2,7 +2,7 @@
 ###
 # @Author       : Gxusb
 # @Date         : 2021-08-07 14:25:21
-# @LastEditTime : 2025-10-19 13:55:37
+# @LastEditTime : 2025-10-19 14:03:30
 # @FileEncoding : UTF-8
 # @Description  : BililiveRecorder CLI 安装与自动更新脚本
 #                 支持首次安装、版本检测、自动下载、安全部署与配置管理
@@ -32,13 +32,13 @@ readonly BR_CONFIG_SCHEMA_URL="https://raw.githubusercontent.com/Bililive/Bilili
 log_info() {
   local msg="${1:-}"
   local delay="${2:-0}"
-  printf "[%s INFO] %s\n" "$(date '+%Y-%m-%dT%H:%M:%S.%3N')" "$msg" >&2
+  printf "[%s INFO] %s\n" "$(date '+%Y-%m-%dT%H:%M:%S.%6N')" "$msg" >&2
   [[ $delay != "0" ]] && sleep "$delay"
 }
 
 log_error() {
   local msg="${1:-}"
-  printf "[%s ERROR] %s\n" "$(date '+%Y-%m-%dT%H:%M:%S.%3N')" "$msg" >&2
+  printf "[%s ERROR] %s\n" "$(date '+%Y-%m-%dT%H:%M:%S.%6N')" "$msg" >&2
   exit 1
 }
 
@@ -69,7 +69,6 @@ detect_os_arch() {
 
 # ========== 版本比较函数 ==========
 version_lt() {
-  # 使用 sort -V 进行语义版本比较，安全可靠
   [[ "$(printf '%s\n%s' "$1" "$2" | sort -V | head -n1)" != "$1" ]]
 }
 
@@ -132,6 +131,13 @@ first_time_setup() {
   read -rp "是否使用代理？(0=否, 1=是) [0]: " use_proxy_input
   BR_USE_PROXY=${use_proxy_input:-0}
 
+  # 代理使用说明提示（基于用户知识库）
+  if [[ "$BR_USE_PROXY" -eq 1 ]]; then
+    log_info "⚠️ 注意：代理仅支持 release 文件下载格式，如：" 0
+    log_info "   https://github.com/hunshcn/project/releases/download/v0.1.0/example.zip" 0
+    log_info "   将被代理为：https://git-proxy.gxusb.com/https://github.com/..." 0
+  fi
+
   read -rp "HTTP Basic 用户名 [$BR_USERNAME_DEFAULT]: " username_input
   BR_USERNAME=${username_input:-$BR_USERNAME_DEFAULT}
 
@@ -192,18 +198,45 @@ main() {
   # 2. 检测系统架构
   detect_os_arch
 
-  # 3. 获取远程最新版本
+  # 3. 获取远程最新版本（增强健壮性）
   log_info "获取最新版本信息..." 0.1
   local api_url="https://api.github.com/repos/Bililive/BililiveRecorder/releases/latest"
-  local tag_name
-  tag_name=$(curl -sL "$api_url" | grep -oE '"tag_name":"v[0-9.]*"' | cut -d'"' -f4)
+  local tag_name=""
+  local max_retries=3
+  local retry_delay=2
+
+  for attempt in $(seq 1 "$max_retries"); do
+    log_info "正在获取版本信息（尝试 $attempt/$max_retries）..." 0
+    tag_name=$(curl -sL --connect-timeout 10 --retry 2 --retry-delay "$retry_delay" "$api_url" |
+      grep -oE '"tag_name":"v[0-9.]*"' |
+      head -n1 |
+      cut -d'"' -f4)
+
+    if [[ -n "$tag_name" ]]; then
+      log_info "成功获取版本: $tag_name" 0.1
+      break
+    fi
+
+    log_info "第 $attempt 次获取失败，$retry_delay 秒后重试..." 1
+    sleep "$retry_delay"
+  done
+
   if [[ -z "$tag_name" ]]; then
-    log_error "无法获取远程版本信息。请检查网络连接或 GitHub API 状态。"
+    log_error "无法获取远程版本信息。请检查：\n  1. 网络连接是否正常\n  2. GitHub API 是否被限流（尝试访问 https://github.com/Bililive/BililiveRecorder/releases）\n  3. 代理配置是否正确：BR_GITHUB_PROXY='$BR_GITHUB_PROXY'\n  4. 尝试临时关闭代理：编辑 config/config.ini，将 BR_USE_PROXY=0"
   fi
 
-  # 4. 构建下载 URL
+  # 4. 构建下载 URL（严格匹配 git-proxy.gxusb.com 支持的格式）
   local app_version="$tag_name"
-  local app_url="${BR_GITHUB_PROXY}https://github.com/Bililive/BililiveRecorder/releases/download/${app_version}/BililiveRecorder-CLI-${SYSTEM_OS_VERSION}.zip"
+  if [[ "$BR_USE_PROXY" -eq 1 ]]; then
+    # 代理仅支持：https://git-proxy.gxusb.com/https://github.com/.../releases/download/...
+    app_url="${BR_GITHUB_PROXY}https://github.com/Bililive/BililiveRecorder/releases/download/${app_version}/BililiveRecorder-CLI-${SYSTEM_OS_VERSION}.zip"
+    log_info "使用代理下载: $app_url" 0.1
+  else
+    # 直连，更稳定
+    app_url="https://github.com/Bililive/BililiveRecorder/releases/download/${app_version}/BililiveRecorder-CLI-${SYSTEM_OS_VERSION}.zip"
+    log_info "直连 GitHub 下载: $app_url" 0.1
+  fi
+
   local app_zip_path="$DOWNLOAD_DIR/BililiveRecorder-CLI-${SYSTEM_OS_VERSION}-${app_version}.zip"
 
   # 5. 检查本地版本
@@ -226,7 +259,7 @@ main() {
     echo "$app_version" >"$LOCAL_VERSION_FILE"
     log_info "✅ 更新完成！" 0
   else
-    log_info "当前版本已是最新: $app_version，无需更新。" 0
+    log_info "当前版本已是最新: $app_version ，无需更新。" 0
   fi
 
   log_info "=== 脚本执行完成 ===" 0.5
