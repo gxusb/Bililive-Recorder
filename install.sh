@@ -2,7 +2,7 @@
 ###
 # @Author       : Gxusb
 # @Date         : 2021-08-07 14:25:21
-# @LastEditTime : 2025-10-19 13:13:00
+# @LastEditTime : 2025-10-19 13:23:13
 # @FileEncoding : -*- UTF-8 -*-
 # @Description  : BililiveRecorder CLI 安装与更新脚本 支持首次安装 + 自动检测更新
 # @Copyright (c) 2025 by Gxusb, All Rights Reserved.
@@ -105,31 +105,29 @@ first_time_setup() {
   if [[ -z "$password_input" ]]; then
     # 生成一个包含小写字母和数字的8位随机密码
     BR_PASSWORD=$(LC_ALL=C tr -dc 'a-z0-9' </dev/urandom | head -c 8)
-    info_log "已为您生成一个安全且易记的密码: ${BR_PASSWORD:0:4}****" 0
+    info_log "已为您生成一个安全且易记的密码: ${BR_PASSWORD:0:4}****"
   else
     # 使用用户输入的密码
     BR_PASSWORD="$password_input"
-    info_log "已使用您输入的密码: ${BR_PASSWORD:0:4}****" 0
+    info_log "已使用您输入的密码: ${BR_PASSWORD:0:4}****"
   fi
 
-  # 初始化路径和目录
-  BR_INSTALL_PATH="$BR_INSTALL_PATH_DEFAULT"
-  BR_GITHUB_PROXY="$BR_GITHUB_PROXY_DEFAULT"
   info_log "安装路径: $BR_INSTALL_PATH" 0.1
   info_log "GitHub 代理: $BR_GITHUB_PROXY" 0.1
   info_log "HTTP Basic 用户名: $BR_USERNAME" 0.1
   info_log "HTTP Basic 密码: ${BR_PASSWORD:0:4}****" 0.1
   info_log "正在创建必要的目录结构..." 0.1
+  # 初始化路径和目录
+  BR_INSTALL_PATH="$BR_INSTALL_PATH_DEFAULT"
+  BR_GITHUB_PROXY="$BR_GITHUB_PROXY_DEFAULT"
   mkdir -p "$BR_INSTALL_PATH"/{Application,config,Downloads,Logs}
 
   # 初始化 config.json
-  #   local cfg="$BR_INSTALL_PATH/Downloads/config.json"
-  #   if [[ ! -f "$cfg" ]]; then
-  #     info_log "初始化 config.json" 0
-  #     cat >"$cfg" <<EOF
-  # {"\$schema":"https://raw.githubusercontent.com/Bililive/BililiveRecorder/dev-1.3/configV2.schema.json","version":2,"global":{},"rooms":[]}
-  # EOF
-  #   fi
+  local cfg="$BR_INSTALL_PATH/Downloads/config.json"
+  if [[ ! -f "$cfg" ]]; then
+    info_log "初始化 config.json" 0
+    echo '{}' >"$cfg"
+  fi
 
   # 写入配置文件
   mkdir -p "$(dirname "$ENV_PATH")"
