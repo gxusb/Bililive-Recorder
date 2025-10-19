@@ -2,7 +2,7 @@
 ###
 # @Author       : Gxusb
 # @Date         : 2021-08-07 14:25:21
-# @LastEditTime : 2025-10-19 13:01:48
+# @LastEditTime : 2025-10-19 13:11:01
 # @FileEncoding : -*- UTF-8 -*-
 # @Description  : BililiveRecorder CLI 安装与更新脚本 支持首次安装 + 自动检测更新
 # @Copyright (c) 2025 by Gxusb, All Rights Reserved.
@@ -150,8 +150,6 @@ main() {
   else
     info_log "未检测到配置文件，进入首次安装模式" 0.3
     first_time_setup
-    # shellcheck disable=SC1090
-    source "$ENV_PATH"
   fi
 
   # 2. 检测系统
