@@ -2,7 +2,7 @@
 ###
 # @Author       : Gxusb
 # @Date         : 2021-08-07 14:25:21
-# @LastEditTime : 2025-10-19 12:49:38
+# @LastEditTime : 2025-10-19 13:01:48
 # @FileEncoding : -*- UTF-8 -*-
 # @Description  : BililiveRecorder CLI 安装与更新脚本 支持首次安装 + 自动检测更新
 # @Copyright (c) 2025 by Gxusb, All Rights Reserved.
@@ -86,10 +86,9 @@ deploy_app() {
 }
 
 # 首次配置
-# 首次配置
 first_time_setup() {
   info_log "首次运行，请配置基本信息" 0.3
-
+  info_log "默认安装路径: $BR_INSTALL_PATH_DEFAULT" 0.1
   # 设置默认值
   BR_USE_PROXY=0
   BR_USERNAME="admin"
