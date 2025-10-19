@@ -2,7 +2,7 @@
 ###
 # @Author       : Gxusb
 # @Date         : 2021-08-07 14:25:21
-# @LastEditTime : 2025-10-19 13:29:49
+# @LastEditTime : 2025-10-19 13:35:08
 # @FileEncoding : -*- UTF-8 -*-
 # @Description  : BililiveRecorder CLI 安装与更新脚本 支持首次安装 + 自动检测更新
 # @Copyright (c) 2025 by Gxusb, All Rights Reserved.
@@ -107,18 +107,15 @@ first_time_setup() {
   BR_USERNAME=${username:-admin}
 
   local password_input
-  read -rsp "HTTP Basic 密码 [留空以自动生成]: " password_input
-  echo
+  read -rp "HTTP Basic 密码 [留空以自动生成]: " password_input
 
-  if [[ -z "$password_input" ]]; then
-    # 生成一个包含小写字母和数字的8位随机密码
+  [[ -z "$password_input" ]] && {
     BR_PASSWORD=$(LC_ALL=C tr -dc 'a-z0-9' </dev/urandom | head -c 8)
     info_log "已为您生成一个安全且易记的密码: ${BR_PASSWORD:0:4}****"
-  else
-    # 使用用户输入的密码
+  } || {
     BR_PASSWORD="$password_input"
     info_log "已使用您输入的密码: ${BR_PASSWORD:0:4}****"
-  fi
+  }
 
   # 打印最终确认信息
   info_log "安装路径: $BR_INSTALL_PATH" 0.1
