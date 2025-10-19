@@ -2,7 +2,7 @@
 ###
 # @Author       : Gxusb
 # @Date         : 2021-08-07 14:25:21
-# @LastEditTime : 2025-10-19 13:11:01
+# @LastEditTime : 2025-10-19 13:13:00
 # @FileEncoding : -*- UTF-8 -*-
 # @Description  : BililiveRecorder CLI 安装与更新脚本 支持首次安装 + 自动检测更新
 # @Copyright (c) 2025 by Gxusb, All Rights Reserved.
@@ -115,16 +115,21 @@ first_time_setup() {
   # 初始化路径和目录
   BR_INSTALL_PATH="$BR_INSTALL_PATH_DEFAULT"
   BR_GITHUB_PROXY="$BR_GITHUB_PROXY_DEFAULT"
+  info_log "安装路径: $BR_INSTALL_PATH" 0.1
+  info_log "GitHub 代理: $BR_GITHUB_PROXY" 0.1
+  info_log "HTTP Basic 用户名: $BR_USERNAME" 0.1
+  info_log "HTTP Basic 密码: ${BR_PASSWORD:0:4}****" 0.1
+  info_log "正在创建必要的目录结构..." 0.1
   mkdir -p "$BR_INSTALL_PATH"/{Application,config,Downloads,Logs}
 
   # 初始化 config.json
-  local cfg="$BR_INSTALL_PATH/Downloads/config.json"
-  if [[ ! -f "$cfg" ]]; then
-    info_log "初始化 config.json" 0
-    cat >"$cfg" <<EOF
-{"\$schema":"https://raw.githubusercontent.com/Bililive/BililiveRecorder/dev-1.3/configV2.schema.json","version":2,"global":{},"rooms":[]}
-EOF
-  fi
+  #   local cfg="$BR_INSTALL_PATH/Downloads/config.json"
+  #   if [[ ! -f "$cfg" ]]; then
+  #     info_log "初始化 config.json" 0
+  #     cat >"$cfg" <<EOF
+  # {"\$schema":"https://raw.githubusercontent.com/Bililive/BililiveRecorder/dev-1.3/configV2.schema.json","version":2,"global":{},"rooms":[]}
+  # EOF
+  #   fi
 
   # 写入配置文件
   mkdir -p "$(dirname "$ENV_PATH")"
