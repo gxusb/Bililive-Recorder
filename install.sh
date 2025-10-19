@@ -2,7 +2,7 @@
 ###
 # @Author       : Gxusb
 # @Date         : 2021-08-07 14:25:21
-# @LastEditTime : 2025-10-19 13:39:00
+# @LastEditTime : 2025-10-19 13:45:00
 # @FileEncoding : -*- UTF-8 -*-
 # @Description  : BililiveRecorder CLI 安装与更新脚本 支持首次安装 + 自动检测更新
 # @Copyright (c) 2025 by Gxusb, All Rights Reserved.
@@ -108,15 +108,9 @@ first_time_setup() {
 
   local password_input
   read -rp "HTTP Basic 密码 [留空以自动生成]: " password_input
-
-  [[ -z "$password_input" ]] && {
-    BR_PASSWORD=$(LC_ALL=C tr -dc 'a-z0-9' </dev/urandom | head -c 8)
-    info_log "已为您生成一个安全且易记的密码: ${BR_PASSWORD:0:4}****"
-  }
-  BR_PASSWORD="$password_input"
-  info_log "已使用您输入的密码: ${BR_PASSWORD:0:4}****"
-
-  # 打印最终确认信息
+  aup=$(LC_ALL=C tr -dc 'a-z0-9' </dev/urandom | head -c 8)
+  BR_PASSWORD="${password_input:-$aup}"
+  info_log "使用的密码: ${BR_PASSWORD:0:4}****"
   info_log "安装路径: $BR_INSTALL_PATH" 0.1
   info_log "GitHub 代理: $BR_GITHUB_PROXY" 0.1
   info_log "HTTP Basic 用户名: $BR_USERNAME" 0.1
