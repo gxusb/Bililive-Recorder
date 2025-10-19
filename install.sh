@@ -2,14 +2,14 @@
 ###
 # @Author       : Gxusb
 # @Date         : 2021-08-07 14:25:21
-# @LastEditTime : 2025-10-19 14:03:30
+# @LastEditTime : 2025-10-19 14:22:55
 # @FileEncoding : UTF-8
 # @Description  : BililiveRecorder CLI 安装与自动更新脚本
 #                 支持首次安装、版本检测、自动下载、安全部署与配置管理
 # @Copyright (c) 2025 by Gxusb, All Rights Reserved.
 ###
 
-set -euo pipefail
+# set -euo pipefail
 
 # ========== 全局常量定义 ==========
 readonly SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
@@ -206,11 +206,8 @@ main() {
   local retry_delay=2
 
   for attempt in $(seq 1 "$max_retries"); do
-    log_info "正在获取版本信息（尝试 $attempt/$max_retries）..." 0
-    tag_name=$(curl -sL --connect-timeout 10 --retry 2 --retry-delay "$retry_delay" "$api_url" |
-      grep -oE '"tag_name":"v[0-9.]*"' |
-      head -n1 |
-      cut -d'"' -f4)
+    log_info "正在获取版本信息（尝试 $attempt / $max_retries ）..." 0
+    tag_name=$(curl -sL --connect-timeout 10 --retry 2 --retry-delay "$retry_delay" "$api_url" | grep '"tag_name"' | head -n1 | cut -d'"' -f4)
 
     if [[ -n "$tag_name" ]]; then
       log_info "成功获取版本: $tag_name" 0.1
